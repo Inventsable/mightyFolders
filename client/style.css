@@ -1,0 +1,130 @@
+:root {
+  --rowMargin: 1.5rem;
+  --highlight: rgba(255, 255, 255, 0.0625);
+}
+
+body {
+  font-family: Rubik, sans-serif;
+  font-size: 12px;
+  overflow-x: hidden;
+}
+
+#app {
+  padding: .325rem .125rem;
+  background-color: var(--colorInputIdle);
+}
+
+span {
+  color: var(--colorFontAlt);
+}
+
+
+.branch:hover > span {
+  color: var(--colorFontHover);
+}
+
+
+.bold {
+  font-weight: bold;
+}
+
+.branch-idle {
+  cursor: pointer;
+  user-select: none;
+  padding: .125rem 0px;
+  background-color: var(--colorInputIdle);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+}
+
+.branch-active {
+  cursor: pointer;
+  user-select: none;
+  padding: .125rem 0px;
+  background-color: var(--highlight);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+}
+
+.childBranch {
+  cursor: pointer;
+  user-select: none;
+  /* border: 2px solid green; */
+  padding-left: var(--rowMargin);
+  line-height: 1.5rem;
+  list-style-type: dot;
+  width: 100%;
+}
+
+
+/* .branch-idle:hover:after, .childBranch:hover:after {
+  content: "";
+  position: absolute;
+  background-color: var(--highlight);
+  display: flex;
+  opacity: 100%;
+  width: 100%;
+  height: 2rem;
+  z-index: 10;
+} */
+
+
+.roots {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  margin-left: .25rem;
+}
+
+
+
+
+.angleNull, .branch-angle, .branch-type {
+  max-width: 1rem;
+  min-width: 1rem;
+  /* border: 2px solid blue; */
+  padding: .125rem .25rem;
+}
+
+.branch-angleRight {
+  color: var(--colorFontAlt);
+  max-width: 1rem;
+  min-width: 1rem;
+  /* border: 2px solid red; */
+  position: relative;
+  left: .25rem;
+}
+
+.branch:hover > .branch-angleRight {
+  color: var(--colorFontHover);
+}
+
+.branch-angleDown {
+  color: var(--colorFontAlt);
+  max-width: 1rem;
+  min-width: 1rem;
+  position: relative;
+  left: 0rem;
+  /* width: calc(1.5rem - .25rem) */
+}
+
+.branch-name {
+  margin-left: .25rem;
+  font-size: 1.125rem;
+}
+
+.branch-type {
+  margin-left: 0rem;
+  font-size: 1.125rem;
+}
+
+.slot {
+  cursor: pointer;
+  user-select: none;
+  display: block;
+  width: 100%;
+}

@@ -1,38 +1,39 @@
 :root {
+  --colorFont: rgba(255, 255, 255, .5);
+  --colorFontHover: rgba(255, 255, 255, .85);
+  --colorBG: #323232;
+  --colorBranch: #262626;
   --rowMargin: 1.5rem;
   --highlight: rgba(255, 255, 255, 0.0625);
+  --quad: cubic-bezier(0.48, 0.04, 0.52, 0.96);
+  font-family: Rubik, sans-serif;
+  font-size: 12px;
+}
+
+ul {
+  list-style: none;
 }
 
 body {
-  font-family: Rubik, sans-serif;
-  font-size: 12px;
   overflow-x: hidden;
+  color: var(--colorFont);
 }
 
 #app {
   padding: .325rem .125rem;
-  background-color: var(--colorInputIdle);
+  background-color: var(--colorBG);
 }
 
-span {
-  color: var(--colorFontAlt);
-}
-
-
-.branch:hover > span {
+.branch-active:hover {
   color: var(--colorFontHover);
-}
-
-
-.bold {
-  font-weight: bold;
+  transition: color 120ms var(--quad) 20ms;
 }
 
 .branch-idle {
   cursor: pointer;
   user-select: none;
   padding: .125rem 0px;
-  background-color: var(--colorInputIdle);
+  background-color: var(--colorBG);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -43,7 +44,6 @@ span {
   cursor: pointer;
   user-select: none;
   padding: .125rem 0px;
-  background-color: var(--highlight);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -53,25 +53,11 @@ span {
 .childBranch {
   cursor: pointer;
   user-select: none;
-  /* border: 2px solid green; */
   padding-left: var(--rowMargin);
   line-height: 1.5rem;
   list-style-type: dot;
   width: 100%;
 }
-
-
-/* .branch-idle:hover:after, .childBranch:hover:after {
-  content: "";
-  position: absolute;
-  background-color: var(--highlight);
-  display: flex;
-  opacity: 100%;
-  width: 100%;
-  height: 2rem;
-  z-index: 10;
-} */
-
 
 .roots {
   display: flex;
@@ -80,36 +66,24 @@ span {
   margin-left: .25rem;
 }
 
-
-
-
 .angleNull, .branch-angle, .branch-type {
   max-width: 1rem;
   min-width: 1rem;
-  /* border: 2px solid blue; */
   padding: .125rem .25rem;
 }
 
 .branch-angleRight {
-  color: var(--colorFontAlt);
   max-width: 1rem;
   min-width: 1rem;
-  /* border: 2px solid red; */
   position: relative;
   left: .25rem;
 }
 
-.branch:hover > .branch-angleRight {
-  color: var(--colorFontHover);
-}
-
 .branch-angleDown {
-  color: var(--colorFontAlt);
   max-width: 1rem;
   min-width: 1rem;
   position: relative;
   left: 0rem;
-  /* width: calc(1.5rem - .25rem) */
 }
 
 .branch-name {

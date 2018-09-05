@@ -118,23 +118,23 @@ body {
 }
 .adobe-icon-angleDown:before {
   content: "\e908";
-  color: var(--colorFontAlt);
+  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-angleUp:before {
   content: "\e90b";
-  color: var(--colorFontAlt);
+  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-angleUpDown:before {
   content: "\e915";
-  color: var(--colorFontAlt);
+  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-file:before {
   content: "\e916";
-  color: var(--colorFontAlt);
+  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-folder:before {
   content: "\e917";
-  color: var(--colorFontAlt);
+  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-newLayer:before {
   content: "\e900";
@@ -142,7 +142,7 @@ body {
 }
 .adobe-icon-angleRight:before {
   content: "\e901";
-  color: var(--colorFontAlt);
+  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-assetExport:before {
   content: "\e902";

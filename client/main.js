@@ -1,60 +1,29 @@
-// var sysPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+Vue.config.devtools = false;
+Vue.config.productionTip = false;
+// loads console.jsx and json2.jsx
 loadUniversalJSXLibraries()
+// loads ext-specific script from ./host
 loadJSX('mightyFolders.jsx')
-window.onload = build;
 
-var testPath = 'C:/Users/PortablePawnShop/Documents/GitMaster/Templates/Adobe-Panels/_master/samp';
-function build(){
-  // csInterface.evalScript(`readFullDirectory('${testPath}')`, function(mirror){
-    // csInterface.evalScript(`alertPath('${sysPath}')`)
-  csInterface.evalScript(`createTree('${testPath}')`, function(mirror){
-    var soil = parseAll(mirror);
-    console.log(soil);
-  });
-}
+// simplified event handler
+// window.Event = new Vue();
+    // Event.$on(event, callback)
+    // Event.$emit(event, data)
 
-function parseAll(str){
-  var result = JSON.parse(str);
-  for (let [key, value] of Object.entries(result)) {
-    if (typeof value !== 'object')
-      result[key] = parseAll(value);
-    else
-      result[key] = key;
+// class for handling events
+  // Event.fire('name', 'data')
+  // Event.listen('name', callback)
+window.Event = new class {
+  constructor() {
+    this.vue = new Vue()
   }
-  return result;
+  fire(event, data = null) {
+    this.vue.$emit(event, data);
+  }
+  listen(event, callback) {
+    this.vue.$on(event, callback);
+  }
 }
-
-
-var data = {
-  name: 'root folder',
-  children: [
-    { name: 'readme.md' },
-    { name: 'text.txt' },
-    {
-      name: 'child folder',
-      children: [
-        {
-          name: 'child folder',
-          children: [
-            { name: 'text.txt' },
-            { name: 'text.txt' }
-          ]
-        },
-        {
-          name: 'child folder',
-          children: [
-            { name: 'text.txt' },
-            { name: 'text.txt' }
-          ]
-        },
-        { name: 'text.txt' },
-        { name: 'text.txt' },
-      ]
-    }
-  ]
-}
-
-console.log(data);
 
 Vue.component('branch', {
   template: `
@@ -73,7 +42,6 @@ Vue.component('branch', {
       </div>
       <span class="branch-name">{{ model.name }}</span>
     </div>
-
     <ul class="childBranch" v-show="open" v-if="isFolder">
       <branch
         class="branch"
@@ -104,6 +72,8 @@ Vue.component('branch', {
       if (this.isFolder) {
         this.open = !this.open;
       }
+      // Does work
+      Event.fire('test', 'testing event manager')
     },
     highlightThis: function(state) {
       if (state) {
@@ -112,25 +82,119 @@ Vue.component('branch', {
         this.highlight = false;
       }
     }
-    // changeType: function () {
-    //   if (!this.isFolder) {
-    //     Vue.set(this.model, 'children', [])
-    //     this.addChild()
-    //     this.open = true
-    //   }
-    // },
-    // addChild: function () {
-    //   this.model.children.push({
-    //     name: 'new stuff'
-    //   })
-    // }
-  }
+  },
+  // Does work
+  //
+  // created() {
+  //   Event.listen('test', function(e) {
+  //     console.log('received test');
+  //     console.log(e);
+  //   })
+  // }
 })
 
-// boot up the app
+var sampdata = {
+  name: 'root folder',
+  children: [
+    { name: 'readme.md' },
+    { name: 'text.txt' },
+    {
+      name: 'child folder',
+      children: [
+        {
+          name: 'child folder',
+          children: [
+            { name: 'text.txt' },
+            { name: 'text.txt' }
+          ]
+        },
+        { name: 'text.txt' },
+        {
+          name: 'child folder',
+          children: [
+            { name: 'text.txt' },
+            { name: 'text.txt' }
+          ]
+        },
+        { name: 'text.txt' },
+      ]
+    }
+  ]
+}
+
 var app = new Vue({
   el: '#app',
   data: {
-    treeData: data
+    treeData: sampdata,
+    // treeData: data,
+    testData: 'none'
+  },
+  beforeCreate() {
+    console.log('beforeCreate data is:');
+    console.log(this.treeData);
+  },
+  mounted() {
+    console.log('mounted data is:');
+    console.log(this.treeData);
+    this.getData()
+  },
+  created() {
+    Event.listen('reroot', function(e) {
+      console.log(`But the menu doesn't change`);
+    })
+  },
+  methods: {
+    getData: function() {
+      csInterface.evalScript(`callTree('${sysPath}')`, function(str) {
+        this.treeData = JSON.parse(str);
+        console.log(`Vue's current data is:`);
+        console.log(this.treeData);
+        Event.fire('reroot')
+      })
+      // Vue.nextTick(function () {
+      //   console.log('Data updated');
+      // })
+    }
+  },
+  computed: {
+    tester: function() {
+      var testData;
+      csInterface.evalScript(`testerJSX('hello')`, function(e) {
+        console.log(e);
+        testData = e;
+      });
+      this.testData = testData;
+      console.log(this.testData);
+    }
   }
 })
+
+// I thought I could solve this by bringing the original source into JS,
+// using event managers to communicate the data change for menu rebuild. No luck.
+// this is commented out.
+// Vue.component('treeview', {
+//   // props: {
+//   //   root: Object
+//   // },
+//   template: `
+//   <ul class="roots">
+//     <branch
+//       class="slot"
+//       :model="root">
+//     </branch>
+//   </ul>
+//   `,
+//   data: function () {
+//     return {
+//       // pointing to the placeholder JSON
+//       root: sampdata
+//     }
+//   },
+//   created() {
+//     // Does not receive event
+//     Event.listen('test', function(e) {
+//       console.log('received test');
+//       console.log(e);
+//     })
+//   }
+// })

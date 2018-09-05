@@ -16,6 +16,10 @@ function chainEvent(data, name) {
   csInterface.evalScript(`JSXEvent('${data}', '${name}')`)
 }
 
+function getCSSVar(prop) {
+  return window.getComputedStyle(document.documentElement).getPropertyValue('--' + prop);
+}
+
 function changeCSSVar(prop, data){
   document.documentElement.style.setProperty('--' + prop, data);
 }

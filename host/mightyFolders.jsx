@@ -1,40 +1,33 @@
-function readFullDirectory(path){
-  var mirror = {
-    name : ''
-  }
+// thanks @SillyV
+function createDirectoryTree(path){
   var f = Folder(path);
-  var allFiles = f.getFiles();
-  var thisFile;
-  for (var i = 0; i < allFiles.length; i++) {
-    var name = this;
-    thisFile = allFiles[i];
-    if (thisFile instanceof Folder) {
-      mirror[thisFile.name] = readFullDirectory(thisFile);
-    } else {
-      mirror[thisFile.name] = thisFile;
-    }
-  }
-  return JSON.stringify(mirror);
+  return getChildNodes(f);
 }
 
-function alertPath(str) {
-  // alert(str);
+function testerJSX(str) {
+  return 'Goodbye';
 }
 
-
-function createTree(path){
-  var mirror = {}
-  var f = Folder(path);
-  var allFiles = f.getFiles();
-  var thisFile;
-  for (var i = 0; i < allFiles.length; i++) {
-    thisFile = allFiles[i];
-    if (thisFile instanceof Folder) {
-      mirror.name = thisFile;
-      // mirror.children.push(createTree(thisFile));
-    } else {
-      mirror['name'] = thisFile.name;
-    }
+function getChildNodes(fsNode){
+  if(fsNode instanceof Folder){
+  	var children = [];
+	var allFiles = fsNode.getFiles();
+	for (var i = 0; i < allFiles.length; i++) {
+	  children.push(getChildNodes(allFiles[i]));
+	}
+  	return {
+      name : decodeURI(fsNode.name),
+  	  children : children
+  	};
+  } else {
+  	return {
+      name : decodeURI(fsNode.name)
+  	};
   }
-  return JSON.stringify(mirror);
+}
+
+function callTree(path) {
+  var allNodes = createDirectoryTree(path);
+  var allNodesInJson = JSON.stringify(allNodes, null, 2);
+  return allNodesInJson;
 }

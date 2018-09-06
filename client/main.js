@@ -65,6 +65,41 @@ Vue.component('branch', {
     isFolder: function () {
       return this.model.children &&
         this.model.children.length;
+    },
+    sortmodel: function () {
+      // console.log('Initial model:');
+      // console.log(this.model);
+      if (this.model.children) {
+        var mirror = Object.entries(this.model.children);
+        mirror.sort(function (a, b) {
+          var targA = Object.entries(a[1])
+          var targB = Object.entries(b[1]);
+
+          if ((targA.length > 1) && (targB.length > 1))
+            return 0;
+          else if ((targA.length > 1) && (targB.length < 2))
+            return -1;
+          else
+            return 1;
+        });
+
+        var reflection = { name: this.model.name };
+
+        var mirrObj = toObject(mirror)
+        reflection.children = [];
+
+        for (let [key, value] of Object.entries(mirrObj)) {
+          var thisChild = mirrObj[key][1];
+          var childObj = { name: thisChild.name }
+          if (thisChild.children)
+            childObj.children = thisChild.children
+          reflection.children.push(childObj);
+        }
+      } else {
+        var reflection = { name: this.model.name };
+      }
+      console.log(reflection);
+      return reflection;
     }
   },
   methods: {
@@ -72,6 +107,7 @@ Vue.component('branch', {
       if (this.isFolder) {
         this.open = !this.open;
       }
+      console.log(this.model);
       // Does work
       Event.fire('test', 'testing event manager')
     },
@@ -81,6 +117,7 @@ Vue.component('branch', {
       } else {
         this.highlight = false;
       }
+      // console.log(this.unsortmodel);
     }
   },
   // Does work
@@ -93,34 +130,42 @@ Vue.component('branch', {
   // }
 })
 
+
+function toObject(arr) {
+  var rv = {};
+  for (var i = 0; i < arr.length; ++i)
+    rv[i] = arr[i];
+  return rv;
+}
+
 var sampdata = {
-  name: 'root folder',
-  children: [
-    { name: 'readme.md' },
-    { name: 'text.txt' },
-    {
-      name: 'child folder',
+  // name: 'root folder',
+  // children: [
+  //   { name: 'readme.md' },
+  //   { name: 'text.txt' },
+  //   {
+      name: 'root',
       children: [
         {
-          name: 'child folder',
+          name: 'branch',
           children: [
-            { name: 'text.txt' },
-            { name: 'text.txt' }
+            { name: 'potatoad.txt' },
+            { name: 'tuneshine.md' }
           ]
         },
-        { name: 'text.txt' },
+        { name: 'spineapple.txt' },
         {
-          name: 'child folder',
+          name: 'crops',
           children: [
-            { name: 'text.txt' },
-            { name: 'text.txt' }
+            { name: 'plumpkin.txt' },
+            { name: 'cluecumber.js' }
           ]
         },
-        { name: 'text.txt' },
+        { name: 'lielax.txt' },
       ]
     }
-  ]
-}
+//   ]
+// }
 
 var app = new Vue({
   el: '#app',
@@ -128,6 +173,11 @@ var app = new Vue({
     treeData: sampdata,
     // treeData: data,
     testData: 'none'
+  },
+  computed: {
+    // sortedModel: function() {
+    //   console.log(this.treeData);
+    // }
   },
   beforeCreate() {
     console.log('beforeCreate data is:');
@@ -165,7 +215,7 @@ var app = new Vue({
       });
       this.testData = testData;
       console.log(this.testData);
-    }
+    },
   }
 })
 

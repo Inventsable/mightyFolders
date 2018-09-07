@@ -1,55 +1,44 @@
 Vue.config.devtools = false;
 Vue.config.productionTip = false;
+console.log('Loading mightyFolders...');
 // loads console.jsx and json2.jsx
 loadUniversalJSXLibraries()
 // loads ext-specific script from ./host
 loadJSX('mightyFolders.jsx')
 
-// simplified event handler
-// window.Event = new Vue();
-    // Event.$on(event, callback)
-    // Event.$emit(event, data)
-
-// class for handling events
-  // Event.fire('name', 'data')
-  // Event.listen('name', callback)
-window.Event = new class {
-  constructor() {
-    this.vue = new Vue()
-  }
-  fire(event, data = null) {
-    this.vue.$emit(event, data);
-  }
-  listen(event, callback) {
-    this.vue.$on(event, callback);
-  }
-}
-
 Vue.component('branch', {
   template: `
   <li>
     <div
-      :class="highlight ? 'branch-active' : 'branch-idle'"
-      @click="toggle"
-      @mouseover="highlightThis(true)"
-      @mouseout="highlightThis(false)">
-      <div :class="open ? 'branch-angleDown' : 'branch-angleRight'">
-        <span v-if="isFolder" :class="open ? 'adobe-icon-angleDown' : 'adobe-icon-angleRight'"></span>
-        <span v-if="!isFolder" class="angleNull"></span>
-      </div>
-      <div class="branch-type">
-        <span :class="isFolder ? 'adobe-icon-folder' : 'adobe-icon-file'"></span>
-      </div>
-      <span class="branch-name">{{ model.name }}</span>
+      class="collapseCol"
+      @click="collapseThis"
+      @mouseover="highlightCollapse">
     </div>
-    <ul class="childBranch" v-show="open" v-if="isFolder">
-      <branch
-        class="branch"
-        v-for="(model, index) in model.children"
-        :key="index"
-        :model="model">
-      </branch>
-    </ul>
+    <div :class="(hasFocus) ? 'focus' : 'noFocus'">
+      <div
+        :class="(hasFocus) ? 'branch-active' : 'branch-idle'"
+        @click="toggle"
+        @mouseover="highlightThis(true)"
+        @mouseout="highlightThis(false)">
+        <div :class="open ? 'branch-angleDown' : 'branch-angleRight'">
+          <span v-if="isFolder" :class="open ? 'adobe-icon-angleDown' : 'adobe-icon-angleRight'"></span>
+          <span v-if="!isFolder" class="angleNull"></span>
+        </div>
+        <div class="branch-type">
+          <span :class="isFolder ? 'adobe-icon-folder' : 'adobe-icon-file'"></span>
+        </div>
+        <span class="branch-name">{{ model.name }}</span>
+      </div>
+
+      <ul class="childBranch" v-show="open" v-if="isFolder">
+        <branch
+          class="branch"
+          v-for="(model, index) in model.children"
+          :key="index"
+          :model="model">
+        </branch>
+      </ul>
+    </div>
   </li>
   `,
   props: {
@@ -59,6 +48,15 @@ Vue.component('branch', {
     return {
       open: false,
       highlight: false,
+      hasFocus: '',
+    }
+  },
+  created: function() {
+    if(this.model.children &&
+        this.model.children.length){
+      this.model.children.sort(function(a,b){
+         return !(a.children && a.children.length);
+      });
     }
   },
   computed: {
@@ -66,50 +64,14 @@ Vue.component('branch', {
       return this.model.children &&
         this.model.children.length;
     },
-    sortmodel: function () {
-      // console.log('Initial model:');
-      // console.log(this.model);
-      if (this.model.children) {
-        var mirror = Object.entries(this.model.children);
-        mirror.sort(function (a, b) {
-          var targA = Object.entries(a[1])
-          var targB = Object.entries(b[1]);
-
-          if ((targA.length > 1) && (targB.length > 1))
-            return 0;
-          else if ((targA.length > 1) && (targB.length < 2))
-            return -1;
-          else
-            return 1;
-        });
-
-        var reflection = { name: this.model.name };
-
-        var mirrObj = toObject(mirror)
-        reflection.children = [];
-
-        for (let [key, value] of Object.entries(mirrObj)) {
-          var thisChild = mirrObj[key][1];
-          var childObj = { name: thisChild.name }
-          if (thisChild.children)
-            childObj.children = thisChild.children
-          reflection.children.push(childObj);
-        }
-      } else {
-        var reflection = { name: this.model.name };
-      }
-      console.log(reflection);
-      return reflection;
-    }
   },
   methods: {
-    toggle: function () {
+    toggle: function(e) {
+      this.setFocus(e);
+      var targ = e.currentTarget.parentNode;
       if (this.isFolder) {
         this.open = !this.open;
       }
-      console.log(this.model);
-      // Does work
-      Event.fire('test', 'testing event manager')
     },
     highlightThis: function(state) {
       if (state) {
@@ -117,134 +79,196 @@ Vue.component('branch', {
       } else {
         this.highlight = false;
       }
-      // console.log(this.unsortmodel);
-    }
+    },
+    highlightCollapse: function() {
+      
+    },
+    setFocus : function(e) {
+      if (!this.hasFocus) {
+        this.clearFocus(this.$root);
+        this.hasFocus = true;
+        this.$root.selected = e.currentTarget;
+      }
+    },
+    clearFocus: function(parent) {
+        if (parent.$children.length) {
+          for (var i = 0; i < parent.$children.length; i++) {
+            var targ = parent.$children[i];
+            targ.hasFocus = false;
+            this.clearFocus(targ);
+          };
+        }
+    },
+    collapseThis: function(e) {
+      console.log(e);
+    },
   },
-  // Does work
-  //
-  // created() {
-  //   Event.listen('test', function(e) {
-  //     console.log('received test');
-  //     console.log(e);
-  //   })
-  // }
 })
 
-
-function toObject(arr) {
-  var rv = {};
-  for (var i = 0; i < arr.length; ++i)
-    rv[i] = arr[i];
-  return rv;
-}
-
-var sampdata = {
-  // name: 'root folder',
-  // children: [
-  //   { name: 'readme.md' },
-  //   { name: 'text.txt' },
-  //   {
-      name: 'root',
-      children: [
-        {
-          name: 'branch',
-          children: [
-            { name: 'potatoad.txt' },
-            { name: 'tuneshine.md' }
-          ]
-        },
-        { name: 'spineapple.txt' },
-        {
-          name: 'crops',
-          children: [
-            { name: 'plumpkin.txt' },
-            { name: 'cluecumber.js' }
-          ]
-        },
-        { name: 'lielax.txt' },
-      ]
+Vue.component('lift', {
+  template: `
+    <div class="liftwrap" @click="gotoParent">
+      <div class="liftbtn">
+        <span class="adobe-icon-angleUp"></span>
+      </div>
+    </div>
+  `,
+  methods: {
+    gotoParent: function(e) {
+      // console.log(this.$root.masterText);
+      var prev = this.$root.masterPath;
+      var newPath = prev.match(/.*\/.*(?=\/)/gm);
+      newPath = newPath[0];
+      console.log(newPath);
+      // this.$root.getData(newPath);
+      // this.$root.masterPath = newPath;
+      // this.$root.getData(`${newPath}`)
+      // console.log(newPath);
     }
-//   ]
-// }
+  }
+});
+
+Vue.component('selector', {
+  template: `
+    <div class="selectLine">
+      <div class="selectPrefix">
+        <div :class="(this.toggle.isSelect) ? 'xtag-select-active' : 'xtag-select-idle'" @click="setActive('select')">
+          <span class="adobe-icon-cursor"></span>
+        </div>
+        <div :class="(this.toggle.isFind) ? 'xtag-find-active' : 'xtag-find-idle'" @click="setActive('find')">
+          <span class="adobe-icon-find"></span>
+        </div>
+        <input :class="(toggle.isActive) ? 'select-input-active' : 'select-input-idle'" type="text" v-model="msg">
+      </div>
+      <div class="selectSuffix">
+        <div :class="(this.isPlus) ? 'xtag-plus-active' : 'xtag-plus-idle'" @click="setFavorite('plus')">
+          <span class="adobe-icon-plus"></span>
+        </div>
+      </div>
+    </div>
+  `,
+  data() {
+    return {
+      msg: 'app.selection',
+      toggleList : ['isActive', 'isSelect', 'isFind'],
+      toggle : {
+        isActive: false,
+        isSelect: false,
+        isFind: false,
+      },
+      isPlus: false,
+    }
+  },
+  methods : {
+    setFavorite: function(lower) {
+      var upper = lower.charAt(0).toUpperCase() + lower.substr(1);
+      this.isPlus = !this.isPlus;
+      if (this.isPlus)
+        changeCSSVar('colorPlusIcon', getCSSVar('colorPlusActive'))
+      else
+        changeCSSVar('colorPlusIcon', getCSSVar('colorPlusIdle'))
+      console.log(this.isPlus);
+      console.log(getCSSVar('colorNoteIcon'));
+    },
+    setActive : function(lower) {
+      var upper = lower.charAt(0).toUpperCase() + lower.substr(1);
+      var lock = '';
+      for (var m = 0; m < this.toggleList.length; m++) {
+        var select = this.toggleList[m];
+        if (select !== 'is' + upper) {
+          this.toggle[select] = false;
+        } else {
+          this.toggle[select] = !this.toggle[select];
+          lock = upper;
+          if (this.toggle[select])
+            changeCSSVar('color' + upper + 'Icon', getCSSVar('color' + upper + 'Active'))
+          else
+            changeCSSVar('color' + upper + 'Icon', getCSSVar('color' + upper + 'Idle'))
+        }
+      }
+      for (var n = 0; n < this.toggleList.length; n++) {
+        var select = trimL(this.toggleList[n], 2);
+        if (select !== lock) {
+          changeCSSVar('color' + select + 'Icon', '#a1a1a1')
+        }
+      }
+    }
+  }
+})
 
 var app = new Vue({
   el: '#app',
   data: {
-    treeData: sampdata,
-    // treeData: data,
-    testData: 'none'
+    treeData: { name : 'Loading...' },
+    selected: 'none',
+    masterText: 'Select a file',
+    masterPath: sysPath,
   },
-  computed: {
-    // sortedModel: function() {
-    //   console.log(this.treeData);
-    // }
-  },
-  beforeCreate() {
-    console.log('beforeCreate data is:');
-    console.log(this.treeData);
-  },
-  mounted() {
-    console.log('mounted data is:');
-    console.log(this.treeData);
-    this.getData()
+  // computed: {
+  //   testVar: function() {
+  //     return 'Hello?'
+  //   },
+  // },
+  methods: {
+    getData: function(path) {
+      csInterface.evalScript(`callTree('${path}')`, this.setData)
+    },
+    setData: function(res) {
+      this.treeData = JSON.parse(res);
+    },
   },
   created() {
-    Event.listen('reroot', function(e) {
-      console.log(`But the menu doesn't change`);
+    this.$on('change', function(e){
+      console.log(e);
     })
   },
-  methods: {
-    getData: function() {
-      csInterface.evalScript(`callTree('${sysPath}')`, function(str) {
-        this.treeData = JSON.parse(str);
-        console.log(`Vue's current data is:`);
-        console.log(this.treeData);
-        Event.fire('reroot')
-      })
-      // Vue.nextTick(function () {
-      //   console.log('Data updated');
-      // })
-    }
-  },
-  computed: {
-    tester: function() {
-      var testData;
-      csInterface.evalScript(`testerJSX('hello')`, function(e) {
-        console.log(e);
-        testData = e;
-      });
-      this.testData = testData;
-      console.log(this.testData);
-    },
+  mounted() {
+    this.getData(`${sysPath}`)
   }
 })
 
-// I thought I could solve this by bringing the original source into JS,
-// using event managers to communicate the data change for menu rebuild. No luck.
-// this is commented out.
-// Vue.component('treeview', {
-//   // props: {
-//   //   root: Object
-//   // },
-//   template: `
-//   <ul class="roots">
-//     <branch
-//       class="slot"
-//       :model="root">
-//     </branch>
-//   </ul>
-//   `,
-//   data: function () {
-//     return {
-//       // pointing to the placeholder JSON
-//       root: sampdata
-//     }
-//   },
-//   created() {
-//     // Does not receive event
-//     Event.listen('test', function(e) {
-//       console.log('received test');
-//       console.log(e);
+
+// if(this.model.children &&
+//     this.model.children.length){
+//   this.model.children.sort(function(a,b){
+//      return !(a.children && a.children.length);
+//   });
+// }
+
+// methods: {
+//   getData: function(path) {
+//     csInterface.evalScript(`callTree('${path}')`, function(e) {
+//       this.treeData = JSON.parse(res)
 //     })
-//   }
-// })
+//   },
+
+
+
+// var sampdata = {
+//   name: 'root folder',
+//   children: [
+//     { name: 'readme.md' },
+//     { name: 'text.txt' },
+//     {
+//       name: 'child folder',
+//       children: [
+//         {
+//           name: 'branch',
+//           children: [
+//             { name: 'potatoad.txt' },
+//             { name: 'tuneshine.md' }
+//           ]
+//         },
+//         { name: 'spineapple.txt' },
+//         {
+//           name: 'crops',
+//           children: [
+//             { name: 'plumpkin.txt' },
+//             { name: 'cluecumber.js' }
+//           ]
+//         },
+//         { name: 'lielax.txt' },
+//       ]
+//     }
+//   ]
+// }

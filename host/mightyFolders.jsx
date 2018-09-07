@@ -1,11 +1,12 @@
 // thanks @SillyV
+
 function createDirectoryTree(path){
   var f = Folder(path);
   return getChildNodes(f);
 }
 
-function testerJSX(str) {
-  return 'Goodbye';
+function testJSX() {
+  return 'JSX successful';
 }
 
 function getChildNodes(fsNode){
@@ -13,7 +14,9 @@ function getChildNodes(fsNode){
   	var children = [];
 	var allFiles = fsNode.getFiles();
 	for (var i = 0; i < allFiles.length; i++) {
-	  children.push(getChildNodes(allFiles[i]));
+    // add custom ignore
+    if (allFiles[i].name !== ".git")
+	   children.push(getChildNodes(allFiles[i]));
 	}
   	return {
       name : decodeURI(fsNode.name),

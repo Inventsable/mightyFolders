@@ -8,11 +8,52 @@
   --quad: cubic-bezier(0.48, 0.04, 0.52, 0.96);
   font-family: Rubik, sans-serif;
   font-size: 12px;
+  --totalW: 94%;
+
+  --borderRad: .4rem;
+  --colorSelectBG: rgba(255, 255, 255, 0.0625);
+  --colorSelectBGActive: #314356;
+  --colorSelectIdle: #a1a1a1;
+  --colorSelectActive: #61AFEF;
+
+  --colorNoteBG: rgba(255, 255, 255, 0.0625);
+  --colorNoteBGActive: #4B363D;
+  --colorNoteIdle: #a1a1a1;
+  --colorNoteActive: #E06C75;
+
+  --colorPlusBG: rgba(255, 255, 255, 0.0625);
+  --colorPlusBGActive: #384C2B;
+  --colorPlusIdle: #a1a1a1;
+  --colorPlusActive: #5FA035;
+
+  --colorFindBG: rgba(255, 255, 255, 0.0625);
+  --colorFindBGActive: #4C463F;
+  --colorFindIdle: #a1a1a1;
+  --colorFindActive: #E5C07B;
+
+  --padding: .4rem;
+  --colorSlotBG: #252830;
+  --colorTagClass: #4C463F;
+  --colorFontClass: #E5C07B;
+  --colorTagVar: #4B363D;
+  --colorFontVar: #E06C75;
+  --colorTagProperty: #40444C;
+  --colorFontProperty: #ABB2BF;
+  --colorTagMethod: #314356;
+  --colorFontMethod: #61AFEF;
+
 }
 
 ul {
   list-style: none;
 }
+
+li {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+
 
 body {
   overflow-x: hidden;
@@ -24,7 +65,7 @@ body {
   background-color: var(--colorBG);
 }
 
-.branch-active:hover {
+.branch-active:hover, .branch-idle:hover {
   color: var(--colorFontHover);
   transition: color 120ms var(--quad) 20ms;
 }
@@ -47,16 +88,82 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  width: 100%;
+  /* width: 100%; */
 }
 
 .childBranch {
   cursor: pointer;
   user-select: none;
-  padding-left: var(--rowMargin);
+  /* padding-left: var(--rowMargin); */
   line-height: 1.5rem;
   list-style-type: dot;
   width: 100%;
+  /* display: flex; */
+  /* justify-content: space-between; */
+}
+
+
+.liftwrap {
+  margin: .125rem 0px .5rem 0px;
+  height: 1.25rem;
+  display: flex;
+  justify-content: center;
+  width: var(--totalW);
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+
+.liftwrap:hover{
+  background-color: var(--colorHover)
+}
+
+
+.liftbtn {
+  width: 100%;
+  text-align: center;
+}
+
+.branch {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* .selector {
+  width: calc(100% - var(--rowMargin));
+  transition: color 120ms var(--quad) 20ms;
+} */
+
+.focus {
+  width: calc(100% - var(--rowMargin));
+  transition: color 120ms var(--quad) 20ms;
+  /* background-color: rgba(255, 255, 255, 0.1); */
+  background-color: var(--colorHover);
+}
+
+.noFocus {
+  width: calc(100% - var(--rowMargin));
+  transition: color 120ms var(--quad) 20ms;
+  background-color: transparent;
+}
+
+.collapseCol {
+  display: flex;
+  width: calc(var(--rowMargin));
+  background-color: var(--colorBG);
+  /* margin: 0px .4rem 0px .15rem; */
+}
+
+/* .collapseCol:nth-child(1) {
+  background-color: red;
+} */
+
+/* .collapseCol:last-of-type {
+  background-color: green;
+} */
+
+.collapseCol:hover {
+  background-color: var(--colorFont);
+
 }
 
 .roots {
@@ -64,6 +171,13 @@ body {
   width: 100%;
   flex-wrap: wrap;
   margin-left: .25rem;
+}
+
+.slot {
+  cursor: pointer;
+  user-select: none;
+  display: block;
+  width: 100%;
 }
 
 .angleNull, .branch-angle, .branch-type {
@@ -91,14 +205,180 @@ body {
   font-size: 1.125rem;
 }
 
+
+
 .branch-type {
   margin-left: 0rem;
   font-size: 1.125rem;
 }
 
-.slot {
-  cursor: pointer;
-  user-select: none;
-  display: block;
+
+.selectLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: var(--totalW);
+  margin-bottom: .5rem;
+}
+
+.selectPrefix {
+  display: flex;
+  justify-content: flex-start;
+  width: calc(100% - 2rem);
+}
+
+.selectSuffix {
+  display: flex;
+  justify-content: flex-end;
+  width: 2rem;
+}
+
+[class^="select-input"] {
+  padding: 0rem var(--padding) 0rem calc(var(--padding)*2);
+  /* background-color: var(--colorInputIdle); */
+  display: flex;
+  color: var(--colorFont);
+  flex-wrap: wrap;
+  border-style: solid;
+  border-width: 0px;
+  /* border-radius: 2px 2px 2px 2px; */
+  /* padding: .25rem .5rem; */
+  height: 2.0rem;
   width: 100%;
+
+  /* width: calc(100% - 4rem); */
+  /* margin: .75rem 0rem .5rem 0rem; */
+}
+
+.select-btn {
+  /* border: 2px solid red; */
+  font-size: 2rem;
+  padding-top: .15rem;
+}
+
+
+.select-input-idle:focus {
+  background-color: var(--colorInputIdle);
+  outline: 1.35px solid var(--colorBorder);
+  outline-offset: -1.35px;
+}
+
+.select-input-idle {
+  background-color: var(--colorInputIdle);
+}
+
+.select-input-active {
+  /* background-color: var(--colorInputActive); */
+}
+
+[class^="xtag"] {
+  transition: background-color 100ms var(--quad)  50ms,
+                         color 100ms var(--quad)  50ms;
+  position: relative;
+  box-sizing: border-box;
+  font-weight: 700;
+  padding: calc(var(--padding) + .14rem) calc(var(--padding) * 2) var(--padding) calc(var(--padding) * 2);
+  /* background-color: rgba(255, 255, 255, 0.065); */
+  width: 2rem;
+  display: flex;
+  justify-content: center;
+  /* border: 2px solid blue; */
+}
+
+[class^="xtag-select"] {
+  text-shadow: var(--shadowLight);
+  padding: 0rem calc(var(--padding) * 2) 0rem calc(var(--padding) * 2);
+  font-size: 2rem;
+  border-radius: var(--borderRad) 0rem 0rem 0rem;
+  color: var(--colorFontProperty);
+  cursor: pointer;
+}
+
+[class^="xtag-find"] {
+  text-shadow: var(--shadowLight);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0rem calc(var(--padding) * 2) 0rem calc(var(--padding) * 2);
+  height: 2.0rem;
+  font-size: 1.3rem;
+  /* color: var(--colorFontProperty); */
+  cursor: pointer;
+}
+
+[class^="xtag-note"] {
+  text-shadow: var(--shadowLight);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0rem var(--borderRad) 0rem 0rem;
+  padding: 0rem calc(var(--padding) * 2) 0rem calc(var(--padding) * 2);
+  height: 2.0rem;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+[class^="xtag-plus"] {
+  text-shadow: var(--shadowLight);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0rem var(--borderRad) 0rem 0rem;
+  padding: 0rem calc(var(--padding) * 2) 0rem calc(var(--padding) * 2);
+  height: 2.0rem;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.xtag-select-active {
+  background-color: var(--colorSelectBGActive);
+}
+
+.xtag-select-idle {
+  background-color: var(--colorSelectBG);
+}
+
+.xtag-find-idle {
+  background-color: var(--colorFindBG);
+}
+
+.xtag-find-active {
+  background-color: var(--colorFindBGActive);
+}
+
+
+.xtag-plus-idle {
+  background-color: var(--colorPlusBG);
+}
+
+.xtag-plus-active {
+  background-color: var(--colorPlusBGActive);
+}
+
+.xtag-note-idle {
+  background-color: var(--colorNoteBG);
+}
+
+.xtag-note-active {
+  background-color: var(--colorNoteBGActive);
+}
+
+.xtag-method {
+  background-color: var(--colorTagMethod);
+  color: var(--colorFontMethod);
+}
+
+.xtag-variable {
+  background-color: var(--colorTagVar);
+  color: var(--colorFontVar);
+}
+
+
+.code {
+  position: relative;
+  top: 100px;
+  padding: .5rem 1rem;
+  background-color: #232323;
+  cursor: pointer;
 }

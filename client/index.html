@@ -16,15 +16,13 @@
   </head>
   <body>
 
-
-
-    <!-- the demo root element -->
     <div id="app">
-      <!-- <treeview></treeview> -->
       <ul class="roots">
+        <selector></selector>
+        <lift></lift>
         <branch
           class="slot"
-          :model="sortmodel">
+          :model="treeData">
         </branch>
       </ul>
     </div>

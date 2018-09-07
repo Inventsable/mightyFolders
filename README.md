@@ -1,6 +1,6 @@
 # mightyFolders
 
-## Successor to mightyFiles
+## Successor to [mightyFiles](https://github.com/Inventsable/mightyFiles)
 
 ``` bash
 # install

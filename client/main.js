@@ -81,7 +81,7 @@ Vue.component('branch', {
       }
     },
     highlightCollapse: function() {
-      
+
     },
     setFocus : function(e) {
       if (!this.hasFocus) {
@@ -115,11 +115,13 @@ Vue.component('lift', {
   `,
   methods: {
     gotoParent: function(e) {
-      // console.log(this.$root.masterText);
       var prev = this.$root.masterPath;
       var newPath = prev.match(/.*\/.*(?=\/)/gm);
       newPath = newPath[0];
       console.log(newPath);
+      
+      // This doesn't work.
+
       // this.$root.getData(newPath);
       // this.$root.masterPath = newPath;
       // this.$root.getData(`${newPath}`)
@@ -204,17 +206,14 @@ var app = new Vue({
     masterText: 'Select a file',
     masterPath: sysPath,
   },
-  // computed: {
-  //   testVar: function() {
-  //     return 'Hello?'
-  //   },
-  // },
   methods: {
     getData: function(path) {
       csInterface.evalScript(`callTree('${path}')`, this.setData)
     },
     setData: function(res) {
       this.treeData = JSON.parse(res);
+      console.log(this.treeData);
+      console.log(JSON.stringify(this.treeData));
     },
   },
   created() {
@@ -226,6 +225,64 @@ var app = new Vue({
     this.getData(`${sysPath}`)
   }
 })
+
+
+// var dirData = {
+//   "name":"mightyFolders",
+//   "children":
+//   [
+//     {"name":".debug"},
+//     {"name":"client",
+//     "children":[
+//       {"name":"index.html"},
+//       {"name":"main.js"},
+//       {"name":"myTstack",
+//       "children":[
+//         {"name":"adobeStyle.css"},
+//         {"name":"anima.css"},
+//         {"name":"CSInterface.js"},
+//         {"name":"eventManager.js"},
+//         {"name":"fonts",
+//         "children":[
+//           {"name":"Adobe-Font.svg"},
+//           {"name":"Adobe-Font.ttf"},
+//           {"name":"Adobe-Font.woff"}
+//         ]},
+//         {"name":"magicMirror.js"},
+//         {"name":"menu_Context.js"},
+//         {"name":"menu_Flyout.js"},
+//         {"name":"mightyFiles.js"},
+//         {"name":"mightyFunctions.js"},
+//         {"name":"ReqLibs.js"},
+//         {"name":"reset.css"}
+//       ]},
+//       {"name":"style.css"}
+//     ]},
+//     {"name":"CSXS",
+//     "children":[
+//       {"name":"manifest.xml"}
+//     ]},
+//     {"name":"host",
+//     "children":[
+//       {"name":"mightyFolders.jsx"},
+//       {"name":"universal",
+//       "children":[
+//         {"name":"Console.jsx"},
+//         {"name":"json2.jsx"}
+//       ]}
+//     ]},
+//     {"name":"icons",
+//     "children":[
+//       {"name":"iconLight.png"}
+//     ]},
+//   {"name":"LICENSE"},
+//   {"name":"log",
+//   "children":[
+//     {"name":"scribe.js"}
+//   ]},
+//   {"name":"README.md"}]
+// }
+
 
 
 // if(this.model.children &&

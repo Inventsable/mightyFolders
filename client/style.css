@@ -150,7 +150,6 @@ body {
   display: flex;
   width: calc(var(--rowMargin));
   background-color: var(--colorBG);
-  /* margin: 0px .4rem 0px .15rem; */
 }
 
 /* .collapseCol:nth-child(1) {

@@ -9,8 +9,11 @@
   font-family: Rubik, sans-serif;
   font-size: 12px;
   --totalW: 94%;
+  --suffixW: 4rem;
 
   --borderRad: .4rem;
+
+  --colorInactiveBG: rgba(255, 255, 255, 0.0625);
   --colorSelectBG: rgba(255, 255, 255, 0.0625);
   --colorSelectBGActive: #314356;
   --colorSelectIdle: #a1a1a1;
@@ -58,7 +61,7 @@ li {
 body {
   overflow-x: hidden;
   overflow-y: auto;
-  color: var(--colorFont);
+  /* color: var(--colorFont); */
 }
 
 #app {
@@ -143,6 +146,10 @@ body {
 
 .branch-active:hover, .branch-idle:hover {
   /* color: var(--colorFontHover); */
+  transition: color 120ms var(--quad) 20ms;
+}
+
+[class^="adobe-icon-"], [class*=" adobe-icon-"] {
   transition: color 120ms var(--quad) 20ms;
 }
 
@@ -366,23 +373,29 @@ body {
 .selectPrefix {
   display: flex;
   justify-content: flex-start;
-  width: calc(100% - 2rem);
+  width: calc(100% - var(--suffixW));
 }
 
 .selectSuffix {
   display: flex;
   justify-content: flex-end;
-  width: 2rem;
+  width: var(--suffixW);
 }
 
 [class^="select-input"] {
-  padding: 0rem var(--padding) 0rem calc(var(--padding)*2);
+  /* padding: 0rem var(--padding) 0rem calc(var(--padding)*2); */
   /* background-color: var(--colorInputIdle); */
+  font-size: 1.25rem;
+  font-family: Rubik, sans-serif;
+  align-items: center;
+  padding: 0rem .5rem;
   display: flex;
   color: var(--colorFont);
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   border-style: solid;
   border-width: 0px;
+  overflow-x: scroll;
+  overflow-y: hidden;
   /* border-radius: 2px 2px 2px 2px; */
   /* padding: .25rem .5rem; */
   height: 2.0rem;
@@ -390,6 +403,10 @@ body {
 
   /* width: calc(100% - 4rem); */
   /* margin: .75rem 0rem .5rem 0rem; */
+}
+
+[class^="select-input"]::-webkit-scrollbar {
+  display: none;
 }
 
 .select-btn {
@@ -414,8 +431,8 @@ body {
 }
 
 [class^="xtag"] {
-  transition: background-color 100ms var(--quad)  50ms,
-                         color 100ms var(--quad)  50ms;
+  transition: background-color 120ms var(--quad)  20ms,
+                         color 120ms var(--quad)  20ms;
   position: relative;
   box-sizing: border-box;
   font-weight: 700;
@@ -472,6 +489,43 @@ body {
   cursor: pointer;
 }
 
+[class^="xtag-save"], [class^="xtag-load"], [class^="xtag-export"], [class^="xtag-import"] {
+  text-shadow: var(--shadowLight);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0rem calc(var(--padding) * 2) 0rem calc(var(--padding) * 2);
+  background-color: var(--colorInactiveBG);
+  height: 2.0rem;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.xtag-save, .xtag-export {
+  border-radius: 0rem var(--borderRad) 0rem 0rem;
+}
+
+
+
+.select-input-active {
+  /* margin-top: .5rem; */
+  /* text-align: ce */
+  display: flex;
+  align-items: center;
+}
+
+.xtag-lit {
+  color: var(--colorFont);
+}
+
+.xtag-dark {
+  color: var(--colorInactiveBG);
+}
+
+[class^="xtag-save"]:hover, [class^="xtag-load"]:hover, [class^="xtag-export"]:hover, [class^="xtag-import"]:hover {
+  background-color: rgba(255, 255, 255, 0.125);
+}
+
 .xtag-select-active {
   background-color: var(--colorSelectBGActive);
 }
@@ -517,9 +571,11 @@ body {
 
 
 .code {
-  position: relative;
+  /* position: relative; */
   top: 100px;
   padding: .5rem 1rem;
-  background-color: #232323;
+  background-color: var(--colorInputIdle);
+  display: flex;
+  color: white;
   cursor: pointer;
 }

@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'Adobe-Font';
   src:
-    url('fonts/Adobe-Font.ttf?egxxnf') format('truetype'),
-    url('fonts/Adobe-Font.woff?egxxnf') format('woff'),
-    url('fonts/Adobe-Font.svg?egxxnf#Adobe-Font') format('svg');
+    url('fonts/Adobe-Font.ttf?hzqpvz') format('truetype'),
+    url('fonts/Adobe-Font.woff?hzqpvz') format('woff'),
+    url('fonts/Adobe-Font.svg?hzqpvz#Adobe-Font') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -91,136 +91,139 @@ body {
   color: var(--colorIcon);
 }
 
+.adobe-icon-saveNew:before {
+  content: "\e91d";
+}
+.adobe-icon-export:before {
+  content: "\e91e";
+}
+.adobe-icon-close:before {
+  content: "\e91f";
+}
+.adobe-icon-doubleDown:before {
+  content: "\e920";
+}
+.adobe-icon-doubleUp:before {
+  content: "\e921";
+}
+.adobe-icon-folder1:before {
+  content: "\e922";
+}
+.adobe-icon-hamburger:before {
+  content: "\e923";
+}
+.adobe-icon-open:before {
+  content: "\e924";
+}
+.adobe-icon-saveFile:before {
+  content: "\e925";
+}
+.adobe-icon-singleDown:before {
+  content: "\e926";
+}
+.adobe-icon-singleLeft:before {
+  content: "\e927";
+}
+.adobe-icon-singleRight:before {
+  content: "\e928";
+}
+.adobe-icon-singleUp:before {
+  content: "\e929";
+}
 .adobe-icon-heart:before {
   content: "\e91a";
-  color: var(--colorHeartIcon);
-  transition: color 100ms var(--quad)  50ms;
 }
 .adobe-icon-minus:before {
   content: "\e91b";
-  color: var(--colorMinusIcon);
-  transition: color 100ms var(--quad)  50ms;
 }
 .adobe-icon-plus:before {
   content: "\e91c";
-  color: var(--colorPlusIcon);
-  transition: color 100ms var(--quad)  50ms;
 }
 .adobe-icon-cursor:before {
   content: "\e919";
-  color: var(--colorSelectIcon);
-  transition: color 100ms var(--quad)  50ms;
+  color: #a1a1a1;
 }
 .adobe-icon-selected:before {
   content: "\e918";
-  color: var(--colorFontAlt);
-  transition: color 100ms var(--quad)  50ms;
 }
 .adobe-icon-angleDown:before {
   content: "\e908";
-  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-angleUp:before {
   content: "\e90b";
-  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-angleUpDown:before {
   content: "\e915";
-  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-file:before {
   content: "\e916";
-  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-folder:before {
   content: "\e917";
-  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-newLayer:before {
   content: "\e900";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-angleRight:before {
   content: "\e901";
-  /* color: var(--colorFontAlt); */
 }
 .adobe-icon-assetExport:before {
   content: "\e902";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-cancel:before {
   content: "\e903";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-checkBoxOff:before {
   content: "\e904";
-  color: #999;
 }
 .adobe-icon-checkBoxOn:before {
   content: "\e905";
-  color: #999;
 }
 .adobe-icon-dissect .path1:before {
   content: "\e906";
-  color: rgb(195, 195, 195);
   opacity: 0.5;
 }
 .adobe-icon-dissect .path2:before {
   content: "\e907";
   margin-left: -1.0029296875em;
-  color: rgb(195, 195, 195);
 }
 .adobe-icon-fill:before {
   content: "\e909";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-find:before {
   content: "\e90a";
-  color: var(--colorFindIcon);
-  transition: color 100ms var(--quad)  50ms;
 }
 .adobe-icon-layerRadioOff:before {
   content: "\e90c";
-  color: #999;
 }
 .adobe-icon-layerRadioOn:before {
   content: "\e90d";
-  color: #999;
 }
 .adobe-icon-lock:before {
   content: "\e90e";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-newLayer2:before {
   content: "\e90f";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-play:before {
   content: "\e910";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-record:before {
   content: "\e911";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-stroke:before {
   content: "\e912";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-trash:before {
   content: "\e913";
-  color: var(--colorFontAlt);
 }
 .adobe-icon-visible:before {
   content: "\e914";
-  color: var(--colorFontAlt);
 }
 
 
 
-[class^="adobe-icon-"]:active, [class*=" adobe-icon-"]:active {
-  /* cursor: pointer; */
-}
+
 
 #app {
   /* display: flex; */

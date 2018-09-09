@@ -57,21 +57,104 @@ li {
 
 body {
   overflow-x: hidden;
+  overflow-y: auto;
   color: var(--colorFont);
 }
 
 #app {
   padding: .325rem .125rem;
   background-color: var(--colorBG);
+  /* background-color: red; */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* .prefsBG {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  border: 2px solid green;
+}
+
+.widget-name h2 {
+    font-size: 12px;
+}
+
+.widget-name[min-width~="20%"] h2 {
+    font-size: 18px;
+}
+
+.widget-name[min-width~="50%"] h2 {
+    padding: 55px;
+    text-align: center;
+    font-size: 24px;
+}
+
+.widget-name[min-width~="80%"] h2 {
+    font-size: 34px;
+    color: red;
+} */
+
+.resizePanes {
+  margin-top: 4.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  /* resize: vertical; */
+  overflow-y: scroll;
+  width: 100%;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+
+.background {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  background-color: var(--colorBG);
+  height: 5.5rem;
+  z-index: 50;
+}
+
+.treeSoil {
+  width: 100%;
+  display: inline-block;
+}
+
+.roots {
+  /* overflow-y: scroll;
+  overflow-x: hidden; */
+  display: flex;
+  /* min-width: 20%; */
+  width: 100%;
+  flex-wrap: wrap;
+  margin-left: .25rem;
+  /* border: 2px solid red; */
+}
+
+.branch-parentHighlight {
+  color: var(--colorFontHover);
+}
+
+.branch-parentDef {
+  color: var(--colorFont);
 }
 
 .branch-active:hover, .branch-idle:hover {
-  color: var(--colorFontHover);
+  /* color: var(--colorFontHover); */
   transition: color 120ms var(--quad) 20ms;
 }
 
+.limitMar {
+  /* border: 2px solid blue; */
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
 .branch-idle {
-  cursor: pointer;
+  /* cursor: pointer; */
   user-select: none;
   padding: .125rem 0px;
   background-color: var(--colorBG);
@@ -82,7 +165,7 @@ body {
 }
 
 .branch-active {
-  cursor: pointer;
+  /* cursor: pointer; */
   user-select: none;
   padding: .125rem 0px;
   display: flex;
@@ -92,38 +175,93 @@ body {
 }
 
 .childBranch {
-  cursor: pointer;
+  /* cursor: pointer; */
   user-select: none;
-  /* padding-left: var(--rowMargin); */
   line-height: 1.5rem;
-  list-style-type: dot;
+  /* list-style-type: dot; */
   width: 100%;
   /* display: flex; */
   /* justify-content: space-between; */
 }
 
 
-.liftwrap {
+[class*="wrap"] {
   margin: .125rem 0px .5rem 0px;
   height: 1.25rem;
   display: flex;
   justify-content: center;
-  width: var(--totalW);
+  /* width: var(--totalW); */
+  width: 50%;
   font-size: 1.125rem;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
-.liftwrap:hover{
+.liftHovwrap {
+  cursor: pointer;
   background-color: var(--colorHover)
 }
 
+.liftLock {
+  cursor: default;
+  opacity: .2;
+}
 
-.liftbtn {
+.marMax {
+  display: flex;
+  /* bottom: 50%; */
+  height: 100%;
+  /* box-sizing: border-box; */
+  /* background-color: red; */
+  width: calc(var(--rowMargin));
+  z-index: 10;
+}
+
+[class^="mar"] {
+  position: absolute;
+}
+
+.treeTools {
+  margin-top: 2.75rem;
+  position: fixed;
+  display: flex;
+  width: 94%;
+  flex-wrap: wrap;
+  z-index: 90;
+}
+
+
+[class*="btn"] {
   width: 100%;
   text-align: center;
 }
 
+.liftbtn, .lockbtn {
+}
+
+.liftHov {
+}
+
+.liftbtn:active {
+  color: var(--colorHover);
+}
+
+.btnidle {
+  cursor: default;
+}
+
+.lockbtn-on {
+  background-color: var(--colorHover);
+}
+
+.lockwrap:hover {
+  background-color: var(--colorHover);
+  cursor: pointer;
+}
+
+
 .branch {
+  /* position: relative; */
+  /* overflow: hidden; */
   display: flex;
   justify-content: space-between;
 }
@@ -160,16 +298,16 @@ body {
   background-color: green;
 } */
 
-.collapseCol:hover {
-  background-color: var(--colorFont);
-
+.marMax:hover {
+  background-color: var(--highlight);
 }
 
-.roots {
-  display: flex;
+
+.slot-locked {
+  cursor: default;
+  user-select: none;
+  display: block;
   width: 100%;
-  flex-wrap: wrap;
-  margin-left: .25rem;
 }
 
 .slot {
@@ -213,12 +351,16 @@ body {
 
 
 .selectLine {
+  position: fixed;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  width: var(--totalW);
+  width: 94%;
+
+  /* min-width: var(--totalW); */
   margin-bottom: .5rem;
+  z-index: 90;
 }
 
 .selectPrefix {

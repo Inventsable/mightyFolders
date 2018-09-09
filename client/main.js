@@ -1,10 +1,26 @@
 Vue.config.devtools = false;
 Vue.config.productionTip = false;
 console.log('Loading mightyFolders...');
-// loads console.jsx and json2.jsx
 loadUniversalJSXLibraries()
-// loads ext-specific script from ./host
 loadJSX('mightyFolders.jsx')
+
+window.Event = new class {
+  constructor() {
+    this.vue = new Vue()
+  }
+  fire(event, data = null) {
+    this.vue.$emit(event, data);
+  }
+  listen(event, callback) {
+    this.vue.$on(event, callback);
+  }
+}
+
+Vue.component('background', {
+  template: `
+    <div class="background"></div>
+  `,
+})
 
 Vue.component('branch', {
   template: `
@@ -16,10 +32,10 @@ Vue.component('branch', {
     </div>
     <div :class="(hasFocus) ? 'focus' : 'noFocus'">
       <div
-        :class="(hasFocus) ? 'branch-active' : 'branch-idle'"
+        :class="(highlight) ? styleHigh : styleHighFocus"
         @click="toggle"
-        @mouseover="highlightThis(true)"
-        @mouseout="highlightThis(false)">
+        @mouseover="ifLocked ? nulli : highlightThis(true)"
+        @mouseout="ifLocked ? nulli : highlightThis(false)">
         <div :class="open ? 'branch-angleDown' : 'branch-angleRight'">
           <span v-if="isFolder" :class="open ? 'adobe-icon-angleDown' : 'adobe-icon-angleRight'"></span>
           <span v-if="!isFolder" class="angleNull"></span>
@@ -29,14 +45,20 @@ Vue.component('branch', {
         </div>
         <span class="branch-name">{{ model.name }}</span>
       </div>
-
       <ul class="childBranch" v-show="open" v-if="isFolder">
-        <branch
-          class="branch"
-          v-for="(model, index) in model.children"
-          :key="index"
-          :model="model">
-        </branch>
+        <div class="limitMar">
+          <div :class="open ? 'marMax' : 'marMin'"
+          v-if="!ifLocked"
+          @click="toggle"
+          @mouseover="highlightThis(true)"
+          @mouseout="highlightThis(false)"></div>
+          <branch
+            class="branch"
+            v-for="(model, index) in model.children"
+            :key="index"
+            :model="model">
+          </branch>
+        </div>
       </ul>
     </div>
   </li>
@@ -49,6 +71,8 @@ Vue.component('branch', {
       open: false,
       highlight: false,
       hasFocus: '',
+      geneRoot: '',
+      geneList: [],
     }
   },
   created: function() {
@@ -60,17 +84,85 @@ Vue.component('branch', {
     }
   },
   computed: {
-    isFolder: function () {
+    ifLocked: function() {
+      if (!this.$root.isLocked) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    styleHighFocus: function() {
+      var foci = (this.hasFocus) ? 'branch-active' : 'branch-idle';
+      var sele = (this.highlight) ? 'branch-parentHighlight' : 'branch-parentDef';
+      // console.log(foci + " " + sele);
+      return foci + " " + sele
+    },
+    styleHigh: function() {
+      var foci = (this.hasFocus) ? 'branch-active' : 'branch-idle';
+      var sele = 'branch-parentHighlight';
+      // console.log(foci + " " + sele);
+      return foci + " " + sele
+    },
+    isFolder: function (){
       return this.model.children &&
         this.model.children.length;
     },
+    geneology: function() {
+      var result = '';
+      for (var i = 0; i < this.geneList.length; i++) {
+        var target = this.geneList[i];
+        if (i > 0) {
+          if (i == this.geneList.length - 1) {
+            result += target
+          } else {
+            result += target + '/'
+          }
+        } else {
+          result += './'
+        }
+      }
+      this.geneList = [];
+      return result;
+    },
   },
   methods: {
+    getAncestry: function(parent) {
+        if (parent.$children.length) {
+          for (var i = 0; i < parent.$children.length; i++) {
+            if (parent.$children[i] !== this.geneRoot) {
+              if (parent.$children[i].$children.length)
+                this.getAncestry(parent.$children[i])
+            } else {
+              this.familyTree = [];
+              this.traceAncestry(this.geneRoot)
+            }
+          };
+        }
+    },
+    traceAncestry: function(gene) {
+      this.geneList.unshift(gene.model.name)
+      if (gene.$parent !== gene.$root) {
+        this.traceAncestry(gene.$parent)
+      }
+    },
+    nulli: function() {
+      // console.log('nothing happens');
+    },
+    locked: function(e) {
+      console.log('This is locked, no pass through');
+    },
     toggle: function(e) {
-      this.setFocus(e);
-      var targ = e.currentTarget.parentNode;
-      if (this.isFolder) {
-        this.open = !this.open;
+      if (!this.$root.isLocked) {
+        this.setFocus(e);
+        this.geneRoot = this;
+        this.getAncestry(this.$root)
+        this.$root.masterText = this.geneology
+        if (this.isFolder) {
+          this.open = !this.open;
+        }
+        console.log('Not locked');
+      } else {
+        console.log('Locked');
       }
     },
     highlightThis: function(state) {
@@ -105,32 +197,111 @@ Vue.component('branch', {
   },
 })
 
-Vue.component('lift', {
+
+Vue.component('treetools', {
+  props: ['path'],
   template: `
-    <div class="liftwrap" @click="gotoParent">
-      <div class="liftbtn">
+  <div class="treeTools">
+    <lift path="path"></lift>
+    <lock path="path"></lock>
+  </div>
+  `
+})
+
+Vue.component('lock', {
+  props: ['path'],
+  template: `
+  <div class="lockwrap"
+    @click="checker"
+    @mouseover="highlight = true"
+    @mouseout="highlight = false">
+    <div :class="(this.$root.isLocked) ? 'lockbtn-on' : 'lockbtn'">
+      <span class="adobe-icon-lock"></span>
+    </div>
+  </div>
+  `,
+  // <div class="lockwrap" >
+  data() {
+    return {
+      highlight: false,
+    }
+  },
+  computed: {
+    // LockandHigh: function() {
+    //   var res = '';
+    //   if (!this.ifLocked) {
+    //     res = 'liftwrap'
+    //     if (this.highlight) {
+    //       res += ' liftHovwrap'
+    //     }
+    //   } else {
+    //     res = 'liftwrap liftLock'
+    //     console.log('locked...');
+    //   }
+    //   return res
+    // }
+  },
+  methods: {
+    checker: function(e) {
+      // console.log('Checked:');
+      // console.log(e);
+      this.$root.isLocked = !this.$root.isLocked
+      console.log(this.$root.isLocked);
+    }
+  }
+})
+
+Vue.component('lift', {
+  props: ['path'],
+  template: `
+    <div :class="LockandHigh"
+      @click="gotoParent"
+      @mouseover="highlight = true"
+      @mouseout="highlight = false">
+      <div :class="highlight ? 'liftHov' : 'liftbtn'">
         <span class="adobe-icon-angleUp"></span>
       </div>
     </div>
   `,
+  data() {
+    return {
+      highlight: false
+    }
+  },
+  computed: {
+    ifLocked: function() {
+      if (!this.$root.isLocked) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    LockandHigh: function() {
+      var res = '';
+      if (!this.ifLocked) {
+        res = 'liftwrap'
+        if (this.highlight) {
+          res += ' liftHovwrap'
+        }
+      } else {
+        res = 'liftwrap liftLock'
+        console.log('locked...');
+      }
+      // var high = this.;
+      return res
+    }
+  },
   methods: {
-    gotoParent: function(e) {
-      var prev = this.$root.masterPath;
-      var newPath = prev.match(/.*\/.*(?=\/)/gm);
-      newPath = newPath[0];
-      console.log(newPath);
-      
-      // This doesn't work.
-
-      // this.$root.getData(newPath);
-      // this.$root.masterPath = newPath;
-      // this.$root.getData(`${newPath}`)
-      // console.log(newPath);
+    gotoParent: function() {
+      Event.fire('toParent');
     }
   }
 });
 
 Vue.component('selector', {
+  props: {
+    model: String
+  },
   template: `
     <div class="selectLine">
       <div class="selectPrefix">
@@ -140,7 +311,7 @@ Vue.component('selector', {
         <div :class="(this.toggle.isFind) ? 'xtag-find-active' : 'xtag-find-idle'" @click="setActive('find')">
           <span class="adobe-icon-find"></span>
         </div>
-        <input :class="(toggle.isActive) ? 'select-input-active' : 'select-input-idle'" type="text" v-model="msg">
+        <input :class="(toggle.isActive) ? 'select-input-active' : 'select-input-idle'" type="text" v-model="model">
       </div>
       <div class="selectSuffix">
         <div :class="(this.isPlus) ? 'xtag-plus-active' : 'xtag-plus-idle'" @click="setFavorite('plus')">
@@ -201,28 +372,35 @@ Vue.component('selector', {
 var app = new Vue({
   el: '#app',
   data: {
-    treeData: { name : 'Loading...' },
+    treeData: { name : 'Something went wrong.' },
     selected: 'none',
     masterText: 'Select a file',
     masterPath: sysPath,
+    isLocked: false,
   },
   methods: {
+    toParent: function() {
+      var prev = this.masterPath;
+      var newPath = prev.match(/.*\/.*(?=\/)/gm);
+      newPath = newPath[0];
+      console.log(newPath);
+    },
     getData: function(path) {
       csInterface.evalScript(`callTree('${path}')`, this.setData)
     },
     setData: function(res) {
       this.treeData = JSON.parse(res);
-      console.log(this.treeData);
-      console.log(JSON.stringify(this.treeData));
     },
   },
   created() {
-    this.$on('change', function(e){
-      console.log(e);
-    })
+    var that = this;
+    Event.listen('toParent', that.toParent)
+    // Event.listen('toParent', function() {
+    //   that.toParent();
+    // })
   },
   mounted() {
-    this.getData(`${sysPath}`)
+    this.getData(`${this.masterPath}`)
   }
 })
 

@@ -16,14 +16,21 @@
   </head>
   <body>
 
+
+
     <div id="app">
       <ul class="roots">
-        <selector></selector>
-        <lift></lift>
-        <branch
-          class="slot"
-          :model="treeData">
-        </branch>
+        <background></background>
+        <selector :model="masterText"></selector>
+        <treetools></treetools>
+        <div class="resizePanes">
+          <div class="treeSoil">
+            <branch
+            :class="isLocked ? 'slot-locked' : 'slot'"
+            :model="treeData">
+          </branch>
+        </div>
+        </div>
       </ul>
     </div>
 

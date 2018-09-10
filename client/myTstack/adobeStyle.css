@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'Adobe-Font';
   src:
-    url('fonts/Adobe-Font.ttf?hzqpvz') format('truetype'),
-    url('fonts/Adobe-Font.woff?hzqpvz') format('woff'),
-    url('fonts/Adobe-Font.svg?hzqpvz#Adobe-Font') format('svg');
+    url('fonts/Adobe-Font.ttf?kd9b0v') format('truetype'),
+    url('fonts/Adobe-Font.woff?kd9b0v') format('woff'),
+    url('fonts/Adobe-Font.svg?kd9b0v#Adobe-Font') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -91,11 +91,20 @@ body {
   color: var(--colorIcon);
 }
 
-.adobe-icon-saveNew:before {
+.adobe-icon-export:before {
   content: "\e91d";
 }
-.adobe-icon-export:before {
+.adobe-icon-import:before {
   content: "\e91e";
+}
+.adobe-icon-folder1:before {
+  content: "\e922";
+}
+.adobe-icon-open:before {
+  content: "\e924";
+}
+.adobe-icon-saveNew:before {
+  content: "\e925";
 }
 .adobe-icon-close:before {
   content: "\e91f";
@@ -106,17 +115,8 @@ body {
 .adobe-icon-doubleUp:before {
   content: "\e921";
 }
-.adobe-icon-folder1:before {
-  content: "\e922";
-}
 .adobe-icon-hamburger:before {
   content: "\e923";
-}
-.adobe-icon-open:before {
-  content: "\e924";
-}
-.adobe-icon-saveFile:before {
-  content: "\e925";
 }
 .adobe-icon-singleDown:before {
   content: "\e926";
@@ -141,7 +141,6 @@ body {
 }
 .adobe-icon-cursor:before {
   content: "\e919";
-  color: #a1a1a1;
 }
 .adobe-icon-selected:before {
   content: "\e918";
@@ -220,9 +219,6 @@ body {
 .adobe-icon-visible:before {
   content: "\e914";
 }
-
-
-
 
 
 #app {

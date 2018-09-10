@@ -43,7 +43,7 @@ Vue.component('branch', {
         <div class="branch-type">
           <span :class="isFolder ? 'adobe-icon-folder' : 'adobe-icon-file'"></span>
         </div>
-        <span class="branch-name">{{ model.name }}</span>
+        <span class="branch-name">{{ nameType }}</span>
       </div>
       <ul class="childBranch" v-show="open" v-if="isFolder">
         <div class="limitMar">
@@ -84,6 +84,15 @@ Vue.component('branch', {
     }
   },
   computed: {
+    nameType: function() {
+      var name = '';
+      if (this.isFolder) {
+        name = trimR(this.model.name, 1);
+      } else {
+        name = this.model.name;
+      }
+      return name;
+    },
     ifLocked: function() {
       if (!this.$root.isLocked) {
         return false;
@@ -115,7 +124,7 @@ Vue.component('branch', {
           if (i == this.geneList.length - 1) {
             result += target
           } else {
-            result += target + '/'
+            result += target
           }
         } else {
           result += './'
@@ -156,12 +165,12 @@ Vue.component('branch', {
         this.setFocus(e);
         this.geneRoot = this;
         this.getAncestry(this.$root)
-        console.log(this.geneology);
+        // console.log(this.geneology);
         var selectedPath = this.$root.masterPath + trimL(this.geneology, 1)
         if (/\/$/gm.test(selectedPath))
           selectedPath = trimR(selectedPath, 1);
         this.$root.selectedPath = selectedPath;
-        console.log(this.$root.selectedPath);
+        // console.log(this.$root.selectedPath);
         this.$root.masterText = this.geneology;
         if (this.isFolder) {
           this.open = !this.open;
@@ -287,31 +296,42 @@ Vue.component('lift', {
 Vue.component('selector', {
   props: ['value'],
   template: `
-    <div class="selectLine">
-      <div class="selectPrefix">
-        <div :class="(this.toggle.isSelect) ? 'xtag-select-active' : 'xtag-select-idle'" @click="setActive('select')">
-          <span class="adobe-icon-cursor"></span>
-        </div>
-        <div :class="(this.toggle.isFind) ? 'xtag-find-active' : 'xtag-find-idle'" @click="setActive('find')">
-          <span class="adobe-icon-find"></span>
-        </div>
-        <div id="selectorInput" :class="(toggle.isActive) ? 'select-input-active' : 'select-input-idle'" contenteditable="contenteditable" @input="updateInput">
-          {{ mixin }}
+    <div class="selectContainer">
+      <div class="selectAnno">
+        <div class="annoBox">
+          {{ anno }}
         </div>
       </div>
-      <div class="selectSuffix">
-        <div
-          :class="open.style"
-          @click="quickOpen()">
-          <span :class="open.icon"></span>
+      <div class="selectLine">
+        <div class="selectPrefix">
+          <div :class="(this.toggle.isSelect) ? 'xtag-select-active' : 'xtag-select-idle'" @click="setActive('select')">
+            <span class="adobe-icon-cursor"></span>
+          </div>
+          <div :class="(this.toggle.isFind) ? 'xtag-find-active' : 'xtag-find-idle'" @click="setActive('find')">
+            <span class="adobe-icon-find"></span>
+          </div>
+          <div id="selectorInput" :class="inputClass" contenteditable="contenteditable" @input="updateInput">
+            <div class="editable">{{ mixin }}</div>
+          </div>
+          <div v-if="suffix" class="editSuffix">
+            <span :class="checkExist"></span>
+          </div>
         </div>
-        <div
-          :class="save.style"
-          @click="quickSave()">
-          <span :class="save.icon"></span>
+        <div class="selectSuffix">
+          <div
+            :class="open.style"
+            @click="quickOpen()">
+            <span :class="open.icon"></span>
+          </div>
+          <div
+            :class="save.style"
+            @click="quickSave()">
+            <span :class="save.icon"></span>
+          </div>
         </div>
       </div>
     </div>
+
   `,
   // <span class="code">./</span>
   // <input :class="(toggle.isActive) ? 'select-input-active' : 'select-input-idle'" type="text" v-model="msg">
@@ -319,7 +339,6 @@ Vue.component('selector', {
   data() {
     return {
       content: '',
-      // msg: this.$root.masterText,
       toggleList : ['isActive', 'isSelect', 'isFind'],
       targEl: this.$el,
       toggle : {
@@ -328,32 +347,70 @@ Vue.component('selector', {
         isFind: false,
       },
       highlight: false,
-      isPlus: false,
+      doesExist: false,
+      fullText: '',
+      suffix: false,
+      // title: '',
     }
   },
   computed: {
+    anno: function() {
+      var desc = 'no action';
+      if (this.canQuicksave)
+        desc = 'quicksave'
+      if (this.canLoad)
+        desc = 'quickload'
+      if (this.canExport)
+        desc = 'export'
+      if (this.canImport)
+        desc = 'import'
+      // if (this.newFolder)
+      //   desc = 'new'
+      return desc;
+    },
+    // checkExist: function() {
+    //   var style = '';
+    //   if (this.doesExist)
+    //     style = 'adobe-icon-checkBoxOn'
+    //   else
+    //     style = 'adobe-icon-checkBoxOff'
+    //   return style;
+    // },
+    inputClass: function() {
+      var res = '';
+      if (this.toggle.isActive)
+        res += 'select-input-active'
+      else
+        res += 'select-input-idle'
+      if (this.doesExist) {
+        res += ' inputExist'
+      } else {
+        if (this.fullText == './') {
+          res += ' inputExist'
+        } else {
+          res += ' inputNew'
+        }
+      }
+      return res;
+    },
     mixin: function() {
-      return this.content || this.$root.masterText
+      return this.content || this.$root.masterText;
     },
     input: function() {
       var selectorInput = document.getElementById('selectorInput');
-      var innerText = selectorInput.innerText  // using innerText here because it preserves newlines
-      // if(innerText[innerText.length-1] === '\n')
-      //     innerText = innerText.slice(0,-1)             // get rid of weird extra newline
-      console.log(innerText.trim());
-      return innerText.trim();
+      try {
+        var innerText = selectorInput.innerText
+        // console.log(innerText.trim());
+        return innerText.trim();
+      } catch(e) {return ''};
     },
-    // msg: function() {
-    //   var res = this.$root.masterText;
-    //   var child = false;
-    //   console.log(this.input);
-    //   this.$root.masterText = child;
-    //   return res;
-    // },
     open: function() {
       var mirror = {};
-      if (this.isFolder) {
+      if (this.canLoad) {
         mirror.icon = 'adobe-icon-open';
+        mirror.style = 'xtag-load xtag-lit';
+      } else if (this.canImport) {
+        mirror.icon = 'adobe-icon-import';
         mirror.style = 'xtag-load xtag-lit';
       } else {
         mirror.icon = 'adobe-icon-close';
@@ -361,10 +418,28 @@ Vue.component('selector', {
       }
       return mirror;
     },
+    // fileType: function() {
+    //   var res = false;
+    //   var targ = this.$root.masterText;
+    //   if (this.isFile(targ)) {
+    //     if (/\.(ai|psd|pdf|svg|dxf)/gm.test(targ)) {
+    //       res = 'adobe';
+    //       // console.log('Can load this file');
+    //     } else if (/\.(png|pdf|)/gm.test(targ)) {
+    //       res = 'image';
+    //     } else {
+    //       res = 'unknown'
+    //     }
+    //   }
+    //   return res;
+    // },
     save: function() {
       var mirror = {};
-      if (this.canSave) {
+      if (this.canQuicksave) {
         mirror.icon = 'adobe-icon-saveNew';
+        mirror.style = 'xtag-save xtag-lit';
+      } else if (this.canExport) {
+        mirror.icon = 'adobe-icon-export';
         mirror.style = 'xtag-save xtag-lit';
       } else {
         mirror.icon = 'adobe-icon-close';
@@ -372,57 +447,257 @@ Vue.component('selector', {
       }
       return mirror;
     },
-    // this.$root.masterText
     canLoad: function() {
       var res = false;
-      var targ = this.$root.masterText;
+      var targ = this.fullText;
       if (this.isFile(targ)) {
-        if (/\.ai/gm.test(targ)) {
-          res = true
+        if (/\.(ai|psd|pdf)/gm.test(targ)) {
+          if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
+            res = true
+          }
+        }
+      }
+      return res;
+    },
+    canQuicksave: function() {
+      var res = false;
+      var targ = this.fullText;
+      if (this.isFile(targ)) {
+        if (/\.(ai|pdf|png|jpg)/gm.test(targ)) {
+          if (!this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
+            res = true
+          }
+        }
+      }
+      return res;
+    },
+    // newFolder: function() {
+    //   var res = false;
+    //   if (this.fullText.substr(this.fullText.length - 1) == '/') {
+    //     var splitter = root.split('/')
+    //     splitter.pop();
+    //     while (splitter.length > 1)
+    //       splitter.shift();
+    //     var splitResult = splitter[0] + '/';
+    //     if (!this.withinFolders(splitResult)) {
+    //       console.log('This should be a folder');
+    //       res = true;
+    //     }
+    //   }
+    // },
+    canImport: function() {
+      var res = false;
+      var targ = this.fullText;
+      if (this.isFile(targ)) {
+        if (/\.(png|jpg|svg|dxf)/gm.test(targ)) {
+          if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
+            res = true
+          }
+        }
+      }
+      return res;
+    },
+    canExport: function() {
+      var res = false;
+      var targ = this.fullText;
+      if (this.isFile(targ)) {
+        if (/\.(svg|dxf)/gm.test(targ)) {
+          if (!this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
+            res = true
+          }
         }
       }
       return res;
     },
     canSave: function() {
       var res = false;
-      var targ = this.$root.selectedPath;
-      var data = this.$root.masterText;
+      var targ = this.title;
       if (this.isFolder(targ)) {
-        if (/\.ai/gm.test(data)) {
+        if (/\.ai/gm.test(this.content)) {
           res = true
+          console.log('Can quicksave');
         }
       }
       return res;
     },
+    repoList: function() {
+      var reflect = [];
+      reflect = this.repoCollect(this.$root.treeData);
+      return reflect;
+    },
+    fileList: function() {
+      var list = this.repoList[1];
+      var mirr = [];
+      list.forEach(function(v,i,a){
+        if (/.*\..*/gm.test(v))
+          mirr.push(v)
+        else if ((v == ".debug") || (v == "LICENSE")) {
+          mirr.push(v)
+        }
+      });
+      return mirr;
+    },
+    folderList: function() {
+      var list = this.repoList[1];
+      var mirr = [];
+      list.forEach(function(v,i,a){
+        if (/.*\..*/gm.test(v)){
+          // file
+        } else {
+          if ((v !== ".debug") && (v !== "LICENSE"))
+            mirr.push(v)
+        }
+      });
+      return mirr;
+    },
+    inFolders: function() {
+      var result = false;
+      this.folderList.forEach(function(v,i,a){
+        if (this.title == v) {
+          result = true;
+        }
+      })
+      return result;
+    },
+    inFiles: function() {
+      var result = false;
+      this.fileList.forEach(function(v,i,a){
+        if (this.title == v) {
+          result = true;
+        }
+      })
+      return result;
+    }
   },
-  created() {
-
+  mounted() {
+    this.updateInput();
+  },
+  updated() {
+    this.updateInput();
+    this.inputHeal();
+    // this.checkFolderSlash();
   },
   methods : {
+    inputHeal: function() {
+      // console.log(this.fullText);
+    },
+    // checkFolderSlash: function() {
+    //   var root = this.fullText;
+    //   if (this.withinFolders(root.substr(root.lastIndexOf('/') + 1))) {
+    //     console.log('This is a valid folder');
+    //     this.$el.innerText += '/';
+    //   }
+    // },
+    withinFolders: function(data) {
+      var result = false;
+      this.folderList.forEach(function(v,i,a){
+        if (data == v) {
+          result = true;
+        }
+      })
+      return result;
+    },
+    withinFiles: function(data) {
+      var result = false;
+      this.fileList.forEach(function(v,i,a){
+        if (data == v) {
+          result = true;
+        }
+      })
+      return result;
+    },
+
+    exists: function(data) {
+      var result = false;
+      for (var i = 0; i < this.fileList.length; i++) {
+        if (data == this.fileList[i]) {
+          result = true;
+        }
+        // console.log(this.fileList[i] + " is " + result);
+      }
+      for (var i = 0; i < this.folderList.length; i++) {
+        if (data == this.folderList[i])
+          result = true;
+        // console.log(this.folderList[i] + " is " + result);
+      }
+      return result;
+    },
+    repoCollect: function(parent, ...arrs) {
+      if (arrs.length < 1) {
+        var fList = [];
+        var dList = [];
+        var arrs = [fList, dList];
+      }
+      try {
+        if (parent.children.length) {
+          for (var i = 0; i < parent.children.length; i++) {
+            var targ = parent.children[i];
+            this.repoCollect(targ, arrs[0], arrs[1]);
+          };
+        }
+      } catch(e){}
+      arrs[1].push(parent.name)
+      return arrs;
+    },
     setInput: function(e) {
-      this.$el.innertText = e;
+      this.content = e;
     },
     updateInput() {
-      console.log('Input:');
-      // console.log(this.$el.innerText);
-      var fullText = './';
-      var lastText = this.$root.masterText;
+      var lastText = this.fullText;
       var thisText = this.$el.innerText;
+      // thisText = strReplace(thisText, '//', '/')
+      var isOpen = false;
+      // console.log('start:');
       // console.log(thisText);
-      // var suffix = "^" + lastText;
-      if (inString(thisText, lastText)) {
-        thisText = thisText.replace(lastText, '');
-        thisText = thisText.replace(/(\r\n|\n|\r|\s)/gm," ");
-        thisText = trimR(thisText, 1);
-        console.log(thisText + " had " + lastText);
+      var openFolder = thisText.substr(thisText.lastIndexOf('/') + 1).trim() + '/';
+      if (this.withinFolders(openFolder)) {
+        // console.log('Within folders');
+        isOpen = true;
+      }
+      if (thisText !== this.fullText) {
+        thisText = thisText.trim();
+        if (isOpen) {
+          // console.log('Open folder detected');
+          // console.log(thisText);
+        }
+        this.fullText = thisText;
+        var title = this.getTitle(thisText);
+        this.title = title;
+        this.doesExist = this.exists(title);
+        if (!this.doesExist) {
+          // console.log('This does not exist');
+          this.title = thisText.substr(thisText.lastIndexOf('/') + 1).trim()
+        }
+        lastText = thisText;
+        console.log(this.title);
+        this.$emit('input', this.fullText);
+      }
+    },
+    getTitle: function(data) {
+      var root = data;
+      var result = '';
+      if (root == './') {
+        result = this.$root.treeData.name
       } else {
-        console.log(thisText + " does not have " + lastText);
+        if (this.withinFiles(root.substr(root.lastIndexOf('/') + 1))) {
+          // console.log('This is an existing file');
+          result = root.substr(root.lastIndexOf('/') + 1);
+        } else if (root.substr(root.length - 1) == '/') {
+          // console.log('Trace like a folder');
+          var splitter = root.split('/')
+          splitter.pop();
+          while (splitter.length > 1)
+            splitter.shift();
+          var splitResult = splitter[0] + '/';
+          if (this.withinFolders(splitResult)) {
+            // console.log('This is an existing folder');
+            result = splitResult;
+          }
+        }
       }
-      if (thisText.length < 2) {
-        console.log('Too short');
-        this.content = fullText;
-      }
-      this.$emit('input', fullText)
+      // console.log('title result:');
+      // console.log(result);
+      return result;
     },
     isFolder: function(str) {
       var res;
@@ -444,24 +719,14 @@ Vue.component('selector', {
       console.log(this.$root.masterText + ' should save');
     },
     quickOpen: function(e) {
-      console.log(this.canLoad);
-      console.log(this.$root.masterText + ' should load');
+      // console.log(this.canLoad);
+      // console.log(this.$root.masterText + ' should load');
     },
     quickExport: function(e) {
       console.log(this.$root.masterText + ' should export');
     },
     quickImport: function(e) {
       console.log(this.$root.masterText + ' should import');
-    },
-    setFavorite: function(lower) {
-      var upper = lower.charAt(0).toUpperCase() + lower.substr(1);
-      this.isPlus = !this.isPlus;
-      if (this.isPlus)
-        changeCSSVar('colorPlusIcon', getCSSVar('colorPlusActive'))
-      else
-        changeCSSVar('colorPlusIcon', getCSSVar('colorPlusIdle'))
-      console.log(this.isPlus);
-      console.log(getCSSVar('colorNoteIcon'));
     },
     setActive : function(lower) {
       var upper = lower.charAt(0).toUpperCase() + lower.substr(1);
@@ -521,7 +786,9 @@ var app = new Vue({
     },
   },
   created() {
+    document.body.setAttribute('spellcheck', false);
     var that = this;
+    console.log(this.treeData);
     Event.listen('toParent', that.toParent)
     // Event.listen('toParent', function() {
     //   that.toParent();

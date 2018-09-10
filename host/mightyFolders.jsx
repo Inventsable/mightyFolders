@@ -19,7 +19,7 @@ function getChildNodes(fsNode){
 	   children.push(getChildNodes(allFiles[i]));
 	}
   	return {
-      name : decodeURI(fsNode.name),
+      name : decodeURI(fsNode.name) + "/",
   	  children : children
   	};
   } else {

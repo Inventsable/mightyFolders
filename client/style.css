@@ -10,7 +10,7 @@
   font-family: Rubik, sans-serif;
   font-size: 12px;
   --totalW: 94%;
-  --suffixW: 4rem;
+  --suffixW: 2rem;
 
   --borderRad: .4rem;
 
@@ -450,21 +450,26 @@ body {
   /* border: 2px solid blue; */
 }
 
-.annoBox {
-  /* padding: 0px rem; */
+[class^="annoBox"] {
   width: 3.8rem;
-  /* border: 2px solid blue; */
   justify-content: center;
   display: flex;
   align-items: center;
+}
+
+.annoBoxOn {
+  opacity: 1;
+}
+
+.annoBox {
+  /* opacity: var(--annoOpacity); */
+  opacity: .5;
 }
 
 .selectAnno {
   text-align: right;
   justify-content: flex-end;
   font-size: .8rem;
-  opacity: var(--annoOpacity);
-  /* right: 1.25rem; */
   position: absolute;
   bottom: .125rem;
   display: flex;

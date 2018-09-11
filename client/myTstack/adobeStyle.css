@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'Adobe-Font';
   src:
-    url('fonts/Adobe-Font.ttf?kd9b0v') format('truetype'),
-    url('fonts/Adobe-Font.woff?kd9b0v') format('woff'),
-    url('fonts/Adobe-Font.svg?kd9b0v#Adobe-Font') format('svg');
+    url('fonts/Adobe-Font.ttf?15t0m1') format('truetype'),
+    url('fonts/Adobe-Font.woff?15t0m1') format('woff'),
+    url('fonts/Adobe-Font.svg?15t0m1#Adobe-Font') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -89,6 +89,10 @@ body {
   /* overflow: scroll; */
   background-color: var(--colorPanelBG);
   color: var(--colorIcon);
+}
+
+.adobe-icon-code:before {
+  content: "\e92a";
 }
 
 .adobe-icon-export:before {

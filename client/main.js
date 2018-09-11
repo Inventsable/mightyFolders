@@ -298,7 +298,7 @@ Vue.component('selector', {
   template: `
     <div class="selectContainer">
       <div class="selectAnno">
-        <div class="annoBox">
+        <div :class="annoClass">
           {{ anno }}
         </div>
       </div>
@@ -311,7 +311,9 @@ Vue.component('selector', {
             <span class="adobe-icon-find"></span>
           </div>
           <div id="selectorInput" :class="inputClass" contenteditable="contenteditable" @input="updateInput">
-            <div class="editable">{{ mixin }}</div>
+            <div
+            @keyup.enter="whichAction"
+            class="editable">{{ mixin }}</div>
           </div>
           <div v-if="suffix" class="editSuffix">
             <span :class="checkExist"></span>
@@ -320,22 +322,20 @@ Vue.component('selector', {
         <div class="selectSuffix">
           <div
             :class="open.style"
-            @click="quickOpen()">
+            @click="whichAction">
             <span :class="open.icon"></span>
-          </div>
-          <div
-            :class="save.style"
-            @click="quickSave()">
-            <span :class="save.icon"></span>
           </div>
         </div>
       </div>
     </div>
-
   `,
+  // <div
+  //   :class="save.style"
+  //   @click="quickSave()">
+  //   <span :class="save.icon"></span>
+  // </div>
   // <span class="code">./</span>
   // <input :class="(toggle.isActive) ? 'select-input-active' : 'select-input-idle'" type="text" v-model="msg">
-
   data() {
     return {
       content: '',
@@ -350,7 +350,8 @@ Vue.component('selector', {
       doesExist: false,
       fullText: '',
       suffix: false,
-      // title: '',
+      newFolder: false,
+      // annotations: ['no action', 'quicksave', 'quickload']
     }
   },
   computed: {
@@ -364,19 +365,27 @@ Vue.component('selector', {
         desc = 'export'
       if (this.canImport)
         desc = 'import'
-      // if (this.newFolder)
-      //   desc = 'new'
+      if (this.canCode)
+        desc = 'view code'
+      if (this.canScript)
+        desc = 'run this'
+      if (this.canText)
+        desc = 'paste'
+      if (this.newFolder) {
+        if (inString(this.fullText, './ '))
+          console.log('At root');
+        desc = 'create'
+      }
       return desc;
     },
-    // checkExist: function() {
-    //   var style = '';
-    //   if (this.doesExist)
-    //     style = 'adobe-icon-checkBoxOn'
-    //   else
-    //     style = 'adobe-icon-checkBoxOff'
-    //   return style;
-    // },
+    annoClass: function() {
+      if (this.hasAction)
+        return 'annoBoxOn'
+      else
+        return 'annoBox'
+    },
     inputClass: function() {
+      // console.log(this.fullText);
       var res = '';
       if (this.toggle.isActive)
         res += 'select-input-active'
@@ -406,44 +415,28 @@ Vue.component('selector', {
     },
     open: function() {
       var mirror = {};
-      if (this.canLoad) {
-        mirror.icon = 'adobe-icon-open';
-        mirror.style = 'xtag-load xtag-lit';
-      } else if (this.canImport) {
-        mirror.icon = 'adobe-icon-import';
-        mirror.style = 'xtag-load xtag-lit';
+      if (this.hasAction) {
+        mirror.style = 'xtag-save xtag-lit';
+        if (this.canLoad) {
+          mirror.icon = 'adobe-icon-open';
+        } else if (this.canImport) {
+          mirror.icon = 'adobe-icon-import';
+        } else if (this.canQuicksave) {
+          mirror.icon = 'adobe-icon-saveNew';
+        } else if (this.canExport) {
+          mirror.icon = 'adobe-icon-export';
+        } else if (this.canCode) {
+          mirror.icon = 'adobe-icon-code';
+        } else if (this.canScript) {
+          mirror.icon = 'adobe-icon-play';
+        } else if (this.canText) {
+          mirror.icon = 'adobe-icon-file';
+        } else if (this.newFolder) {
+          mirror.icon = 'adobe-icon-folder';
+        }
       } else {
         mirror.icon = 'adobe-icon-close';
         mirror.style = 'xtag-load xtag-dark';
-      }
-      return mirror;
-    },
-    // fileType: function() {
-    //   var res = false;
-    //   var targ = this.$root.masterText;
-    //   if (this.isFile(targ)) {
-    //     if (/\.(ai|psd|pdf|svg|dxf)/gm.test(targ)) {
-    //       res = 'adobe';
-    //       // console.log('Can load this file');
-    //     } else if (/\.(png|pdf|)/gm.test(targ)) {
-    //       res = 'image';
-    //     } else {
-    //       res = 'unknown'
-    //     }
-    //   }
-    //   return res;
-    // },
-    save: function() {
-      var mirror = {};
-      if (this.canQuicksave) {
-        mirror.icon = 'adobe-icon-saveNew';
-        mirror.style = 'xtag-save xtag-lit';
-      } else if (this.canExport) {
-        mirror.icon = 'adobe-icon-export';
-        mirror.style = 'xtag-save xtag-lit';
-      } else {
-        mirror.icon = 'adobe-icon-close';
-        mirror.style = 'xtag-save xtag-dark';
       }
       return mirror;
     },
@@ -451,7 +444,7 @@ Vue.component('selector', {
       var res = false;
       var targ = this.fullText;
       if (this.isFile(targ)) {
-        if (/\.(ai|psd|pdf)/gm.test(targ)) {
+        if (/\.(ai|psd|pdf|csv)/gm.test(targ)) {
           if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
             res = true
           }
@@ -463,7 +456,7 @@ Vue.component('selector', {
       var res = false;
       var targ = this.fullText;
       if (this.isFile(targ)) {
-        if (/\.(ai|pdf|png|jpg)/gm.test(targ)) {
+        if (/\.(ai|pdf)/gm.test(targ)) {
           if (!this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
             res = true
           }
@@ -471,25 +464,68 @@ Vue.component('selector', {
       }
       return res;
     },
-    // newFolder: function() {
-    //   var res = false;
-    //   if (this.fullText.substr(this.fullText.length - 1) == '/') {
-    //     var splitter = root.split('/')
-    //     splitter.pop();
-    //     while (splitter.length > 1)
-    //       splitter.shift();
-    //     var splitResult = splitter[0] + '/';
-    //     if (!this.withinFolders(splitResult)) {
-    //       console.log('This should be a folder');
-    //       res = true;
-    //     }
-    //   }
-    // },
+    hasAction: function() {
+      if ((this.canLoad) || (this.canQuicksave) || (this.canSave) || (this.canImport) || (this.canExport) || (this.newFolder) || (this.canScript) || (this.canCode) || (this.canText))
+        return true;
+      else
+        return false;
+    },
+    canAction: function() {
+      if ((this.canLoad) || (this.canQuicksave) || (this.canSave) || (this.canImport) || (this.canExport) || (this.canScript) || (this.canCode) || (this.canText))
+        return true;
+      else
+        return false;
+    },
+    canCode: function() {
+      var res = false;
+      var targ = this.fullText;
+      if (this.isFile(targ)) {
+        if (/\.(js\s|js|css|html|json|xml|vue|ts|debug)/gm.test(targ)) {
+          if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
+            // console.log(targ);
+            if (/\.jsx/gm.test(targ)) {
+              console.log('This is a script');
+              res = false
+            } else {
+              // console.log('Is not a script');
+              res = true
+            }
+          }
+        }
+      }
+      return res;
+    },
+    canScript: function() {
+      var res = false;
+      var targ = this.fullText;
+      if (this.isFile(targ)) {
+        if (/\.jsx/gm.test(targ)) {
+          if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
+            res = true
+          }
+        }
+      }
+      return res;
+    },
+    canText: function() {
+      var res = false;
+      var targ = this.fullText;
+      if (this.isFile(targ)) {
+        if (/\.(txt|md)/gm.test(targ)) {
+          if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
+            res = true;
+          }
+        } else if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1)) == 'LICENSE') {
+          res = true;
+        }
+      }
+      return res;
+    },
     canImport: function() {
       var res = false;
       var targ = this.fullText;
       if (this.isFile(targ)) {
-        if (/\.(png|jpg|svg|dxf)/gm.test(targ)) {
+        if (/\.(png|jpg|svg|dxf|woff|ttf)/gm.test(targ)) {
           if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
             res = true
           }
@@ -501,7 +537,7 @@ Vue.component('selector', {
       var res = false;
       var targ = this.fullText;
       if (this.isFile(targ)) {
-        if (/\.(svg|dxf)/gm.test(targ)) {
+        if (/\.(svg|dxf|png|jpg)/gm.test(targ)) {
           if (!this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
             res = true
           }
@@ -548,6 +584,7 @@ Vue.component('selector', {
             mirr.push(v)
         }
       });
+      // mirr.push('./')
       return mirr;
     },
     inFolders: function() {
@@ -571,6 +608,15 @@ Vue.component('selector', {
   },
   mounted() {
     this.updateInput();
+
+    this.$el.addEventListener('keyup', function(e){
+      if (e.key == 'Enter') {
+        console.log('Submit this');
+        e.preventDefault();
+        this.whichAction();
+      }
+      // console.log(e);
+    })
   },
   updated() {
     this.updateInput();
@@ -579,15 +625,44 @@ Vue.component('selector', {
   },
   methods : {
     inputHeal: function() {
+      if (this.canAction)
+        this.newFolder = false;
       // console.log(this.fullText);
+      // var txt = this.fullText;
+      // console.log(txt);
+      // var regex = /.*[^./]/gm;
+      // var data = txt.replace(regex, '');
+      // if (data == './') {
+      //   this.newFolder = false;
+      //   console.log('Home');
+      // }
+      // console.log(data);
     },
-    // checkFolderSlash: function() {
-    //   var root = this.fullText;
-    //   if (this.withinFolders(root.substr(root.lastIndexOf('/') + 1))) {
-    //     console.log('This is a valid folder');
-    //     this.$el.innerText += '/';
-    //   }
-    // },
+    whichAction: function() {
+      // try {
+        if (this.hasAction) {
+          if (this.canLoad) {
+            return this.quickLoad(this.title);
+          } else if (this.canImport) {
+            return this.quickImport(this.title);
+          } else if (this.canQuicksave) {
+            return this.quickSave(this.title);
+          } else if (this.canExport) {
+            return this.quickExport(this.title);
+          } else if (this.canCode) {
+            return this.quickCode(this.title);
+          } else if (this.canScript) {
+            return this.quickScript(this.title);
+          } else if (this.canText) {
+            return this.quickText(this.title);
+          } else if (this.newFolder) {
+            return this.quickFolder(this.title);
+          }
+        } else {
+          console.log(`Can't do anything.`);
+        }
+      // } catch(e) {}
+    },
     withinFolders: function(data) {
       var result = false;
       this.folderList.forEach(function(v,i,a){
@@ -595,6 +670,10 @@ Vue.component('selector', {
           result = true;
         }
       })
+      // Causes crash
+      // if (data == '/') {
+      //   result = true;
+      // }
       return result;
     },
     withinFiles: function(data) {
@@ -608,6 +687,8 @@ Vue.component('selector', {
     },
 
     exists: function(data) {
+      // var regex = /.*[^./]/gm;
+      // var data = data.replace(regex, '');
       var result = false;
       for (var i = 0; i < this.fileList.length; i++) {
         if (data == this.fileList[i]) {
@@ -620,6 +701,8 @@ Vue.component('selector', {
           result = true;
         // console.log(this.folderList[i] + " is " + result);
       }
+      // if (data == '.' | data == './')
+      //   result = true;
       return result;
     },
     repoCollect: function(parent, ...arrs) {
@@ -653,6 +736,7 @@ Vue.component('selector', {
       if (this.withinFolders(openFolder)) {
         // console.log('Within folders');
         isOpen = true;
+        this.newFolder = false;
       }
       if (thisText !== this.fullText) {
         thisText = thisText.trim();
@@ -664,16 +748,20 @@ Vue.component('selector', {
         var title = this.getTitle(thisText);
         this.title = title;
         this.doesExist = this.exists(title);
-        if (!this.doesExist) {
-          // console.log('This does not exist');
-          this.title = thisText.substr(thisText.lastIndexOf('/') + 1).trim()
-        }
+        // if (!this.doesExist) {
+        //   this.title = thisText.substr(thisText.lastIndexOf('/') + 1).trim()
+        // }
+        // console.log(this.title);
         lastText = thisText;
-        console.log(this.title);
+        // if (this.$root.treeData.name = "Something went wrong") {
+        //   this.title = 'Setting up data...';
+        // }
+        // console.log(this.title);
         this.$emit('input', this.fullText);
       }
     },
     getTitle: function(data) {
+      // console.log(data);
       var root = data;
       var result = '';
       if (root == './') {
@@ -689,44 +777,75 @@ Vue.component('selector', {
           while (splitter.length > 1)
             splitter.shift();
           var splitResult = splitter[0] + '/';
+          // console.log(splitResult);
+          // console.log(do);
           if (this.withinFolders(splitResult)) {
+            this.newFolder = false;
             // console.log('This is an existing folder');
             result = splitResult;
+          } else {
+            console.log('This folder does not exist yet');
+            this.newFolder = true;
+            result = splitResult;
           }
+        } else {
+          // this.newFolder = false;
         }
       }
-      // console.log('title result:');
+      // if (this.isFolder)
+      // console.log();
       // console.log(result);
       return result;
     },
     isFolder: function(str) {
       var res;
-      if (/.*\/.*\..*/gm.test(str))
+      if (/(.*\/.*\..*)|(.*LICENSE)/gm.test(str))
         res = false;
+      else if ((str == './') || (str = '/'))
+        res = true;
       else
         res = true;
       return res;
     },
     isFile: function(str) {
       var res;
-      if (/.*\/.*\..*/gm.test(str))
+      if (/(.*\/.*\..*)|(.*LICENSE)/gm.test(str))
         res = true;
       else
         res = false;
       return res;
     },
     quickSave: function(e) {
-      console.log(this.$root.masterText + ' should save');
+      console.log(this.$root.masterText + ' should save as a new file');
+      console.log(e);
     },
-    quickOpen: function(e) {
-      // console.log(this.canLoad);
-      // console.log(this.$root.masterText + ' should load');
+    quickLoad: function(e) {
+      console.log(this.$root.masterText + ' should load as a new document');
+      console.log(e);
     },
     quickExport: function(e) {
-      console.log(this.$root.masterText + ' should export');
+      console.log(this.$root.masterText + ' should export from this document');
+      console.log(e);
     },
     quickImport: function(e) {
-      console.log(this.$root.masterText + ' should import');
+      console.log(this.$root.masterText + ' should import to current document');
+      console.log(e);
+    },
+    quickScript: function(e) {
+      console.log(this.$root.masterText + ' should run as a script');
+      console.log(e);
+    },
+    quickCode: function(e) {
+      console.log(this.$root.masterText + ' should display in PlayWrite');
+      console.log(e);
+    },
+    quickText: function(e) {
+      console.log(this.$root.masterText + ' should paste code into document');
+      console.log(e);
+    },
+    quickFolder: function(e) {
+      console.log(this.$root.masterText + ' should be created as a new folder');
+      console.log(e);
     },
     setActive : function(lower) {
       var upper = lower.charAt(0).toUpperCase() + lower.substr(1);
@@ -769,14 +888,28 @@ var app = new Vue({
       var selectorInput = document.getElementById('selectorInput');
       console.log(selectorInput.innerText);
       return selectorInput.innerText;
+    },
+    OS: function() {
+      if (navigator.platform.indexOf('Win') > -1) {
+        return 'Win';
+      } else if (navigator.platform.indexOf('Mac') > -1) {
+        return 'Mac';
+      } else {
+        return 'Unknown';
+      }
     }
   },
   methods: {
+    // @Vasily
     toParent: function() {
       var prev = this.masterPath;
       var newPath = prev.match(/.*\/.*(?=\/)/gm);
       newPath = newPath[0];
+      console.log('Destination should be:');
       console.log(newPath);
+      // ^ Correct path
+      // But try below and Illustrator will crash:
+      // this.getData(newPath)
     },
     getData: function(path) {
       csInterface.evalScript(`callTree('${path}')`, this.setData)
@@ -788,7 +921,10 @@ var app = new Vue({
   created() {
     document.body.setAttribute('spellcheck', false);
     var that = this;
-    console.log(this.treeData);
+    console.log(`This is running on ${this.OS}`);
+
+    //
+    // Using separate vue instance to communicate to root instance:
     Event.listen('toParent', that.toParent)
     // Event.listen('toParent', function() {
     //   that.toParent();

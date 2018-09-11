@@ -311,9 +311,7 @@ Vue.component('selector', {
             <span class="adobe-icon-find"></span>
           </div>
           <div id="selectorInput" :class="inputClass" contenteditable="contenteditable" @input="updateInput">
-            <div
-            @keyup.enter="whichAction"
-            class="editable">{{ mixin }}</div>
+            <div class="editableInput">{{ mixin }}</div>
           </div>
           <div v-if="suffix" class="editSuffix">
             <span :class="checkExist"></span>
@@ -608,14 +606,23 @@ Vue.component('selector', {
   },
   mounted() {
     this.updateInput();
-
+    var self = this;
     this.$el.addEventListener('keyup', function(e){
       if (e.key == 'Enter') {
+        // console.log(this);
         console.log('Submit this');
-        e.preventDefault();
-        this.whichAction();
+        // e.preventDefault();
+        // e.stopPropagation();
+        try {
+          if (self.hasAction) {
+            // console.log('Trying action');
+            self.whichAction();
+          } else {
+            console.log(`Can't do anything.`);
+          }
+        } catch(e) {
+        }
       }
-      // console.log(e);
     })
   },
   updated() {
@@ -627,39 +634,31 @@ Vue.component('selector', {
     inputHeal: function() {
       if (this.canAction)
         this.newFolder = false;
-      // console.log(this.fullText);
-      // var txt = this.fullText;
-      // console.log(txt);
-      // var regex = /.*[^./]/gm;
-      // var data = txt.replace(regex, '');
-      // if (data == './') {
-      //   this.newFolder = false;
-      //   console.log('Home');
-      // }
-      // console.log(data);
     },
     whichAction: function() {
       // try {
+      // console.log(this.hasAction);
         if (this.hasAction) {
+          // console.log(`Why don't you work?`);
           if (this.canLoad) {
-            return this.quickLoad(this.title);
+            this.quickLoad(this.title);
           } else if (this.canImport) {
-            return this.quickImport(this.title);
+            this.quickImport(this.title);
           } else if (this.canQuicksave) {
-            return this.quickSave(this.title);
+            this.quickSave(this.title);
           } else if (this.canExport) {
-            return this.quickExport(this.title);
+            this.quickExport(this.title);
           } else if (this.canCode) {
-            return this.quickCode(this.title);
+            this.quickCode(this.title);
           } else if (this.canScript) {
-            return this.quickScript(this.title);
+            this.quickScript(this.title);
           } else if (this.canText) {
-            return this.quickText(this.title);
+            this.quickText(this.title);
           } else if (this.newFolder) {
-            return this.quickFolder(this.title);
+            this.quickFolder(this.title);
           }
         } else {
-          console.log(`Can't do anything.`);
+          console.log(`No actions available right now.`);
         }
       // } catch(e) {}
     },

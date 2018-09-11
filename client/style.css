@@ -383,6 +383,21 @@ body {
   width: var(--suffixW);
 }
 
+.editableInput {
+  display: inline-block;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-x: scroll;
+}
+
+.editableInput::-webkit-scrollbar {
+  display: none;
+}
+
+.editableInput br {
+  display: none;
+}
+
 .editSuffix {
   padding-right: .25rem;
   height: 2rem;

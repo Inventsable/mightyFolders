@@ -22,15 +22,13 @@ Vue.component('background', {
   `,
 })
 
+
 Vue.component('branch', {
   template: `
   <li>
-    <div
-      class="collapseCol"
-      @click="collapseThis"
-      @mouseover="highlightCollapse">
+    <div class="collapseCol">
     </div>
-    <div :class="(hasFocus) ? 'focus' : 'noFocus'">
+    <div :class="focusClass">
       <div
         :class="(highlight) ? styleHigh : styleHighFocus"
         @click="toggle"
@@ -73,17 +71,38 @@ Vue.component('branch', {
       hasFocus: '',
       geneRoot: '',
       geneList: [],
+      isAltFocused: false,
+      hasAltFocus: '',
+      sibs: [],
+      next: '',
+      prev: '',
+      // aFParent: '',
+      // aFChild: '',
     }
   },
-  created: function() {
+  mounted() {
+    // this.$root.$children[3].open = true;
+    // this.$root.$children[3].$children[0].isAltFocused = true;
+    // this.findAltFocus(this.$root);
+    // Event.listen('altFocusChange', this.nextAltFocus)
+  },
+  created() {
     if(this.model.children &&
         this.model.children.length){
       this.model.children.sort(function(a,b){
          return !(a.children && a.children.length);
       });
     }
+    // document.getElementById("name").addEventListener("click", , false);
+    // document.body.addEventListener('keyup', this.keyHandler)
   },
   computed: {
+    focusClass: function() {
+      var res = '';
+      res += (this.hasFocus) ? 'focus' : 'noFocus';
+      res += (this.isAltFocused) ? ' altFocus' : ' altNoFocus'
+      return res;
+    },
     nameType: function() {
       var name = '';
       if (this.isFolder) {
@@ -135,6 +154,10 @@ Vue.component('branch', {
     },
   },
   methods: {
+    keyHandler: function(event) {
+      // console.log(`${event.key} was pressed`);
+      console.log(event);
+    },
     getAncestry: function(parent) {
         if (parent.$children.length) {
           for (var i = 0; i < parent.$children.length; i++) {
@@ -206,8 +229,99 @@ Vue.component('branch', {
           };
         }
     },
-    collapseThis: function(e) {
-      console.log(e);
+    findAltFocus: function(parent) {
+      if (!this.isAltFocused) {
+        if (parent.$children.length) {
+          for (var i = 0; i < parent.$children.length; i++) {
+            var targ = parent.$children[i];
+            if (targ.isAltFocused) {
+              this.hasAltFocus = targ;
+              // this.$root.altFocus = targ;
+              this.$root.aFParent = parent;
+              this.$root.aFChild = targ;
+              break
+            }
+            if (!this.isAltFocused)
+              this.findAltFocus(targ);
+            // targ.hasFocus = false;
+          };
+        }
+      }
+    },
+    nextAltFocus : function(e) {
+      // console.log(e);
+      var childRef;
+      try {
+        var match = this.$root.aFChild;
+        console.log(match);
+        this.$root.aFParent.$children.forEach(function(v,i,a) {
+          if (v == match) {
+            console.log('Matching here:');
+            console.log(v);
+            sibs = a;
+            next = i + 1;
+            prev = i - 1;
+            // v.isAltFocused = false;
+          }
+        });
+        // if (sibs.length) {
+        // }
+        console.log(sibs);
+        console.log(next);
+        console.log(sibs[next]);
+        console.log(this.$root.aFChild);
+        console.log(aFChild);
+        // sibs = [];
+        // console.log(childRef);
+        // console.log('Next should be');
+        // console.log(matchRef);
+      } catch(e){
+
+      } finally {
+        console.log('Matching next:')
+        console.log(this.$root.$children[3].sibs);
+        console.log('-----');
+        this.$root.aFChild = this.$root.$children[3].sibs[next];
+      }
+    },
+
+    // if (/.*\//gm.test(v.model.name)) {
+    //   console.log('This is a folder');
+      // if (this.open) {
+      //   console.log('which is currently open');
+      // } else {
+      //   if (i < a.length - 1) {
+      //     a[(i+1)].isAltFocused = true;
+      //     this.aFChild = a[(i+1)];
+      //   } else {
+      //     console.log('Last');
+      //   }
+      // }
+    // } else {
+    //   console.log('This is a file');
+    //   if (i < a.length - 1) {
+    //     this.aFChild = a[(i+1)];
+    //   } else {
+    //     // this.aFChild = this.aFParent;
+    //     // this.findAltFocus(this)
+    //     // console.log('Last');
+    //   }
+
+        // console.log(v.model.name);
+        // a[(i+1)].isAltFocused = true;
+        // console.log(this.aFChild);
+        // v.isAltFocused = false;
+        // this.$root.aFChild.isAltFocused = false;
+      // }
+
+    clearAltFocus: function(parent) {
+      if (parent.$children.length) {
+        for (var i = 0; i < parent.$children.length; i++) {
+          var targ = parent.$children[i];
+          targ.hasFocus = false;
+          this.clearAltFocus(targ);
+        };
+      }
     },
   },
 })
@@ -349,6 +463,7 @@ Vue.component('selector', {
       fullText: '',
       suffix: false,
       newFolder: false,
+      altFocus: '',
       // annotations: ['no action', 'quicksave', 'quickload']
     }
   },
@@ -609,14 +724,16 @@ Vue.component('selector', {
     var self = this;
     this.$el.addEventListener('keyup', function(e){
       if (e.key == 'Enter') {
+        console.log('Submitting...');
         // console.log(this);
-        console.log('Submit this');
         // e.preventDefault();
         // e.stopPropagation();
         try {
           if (self.hasAction) {
             // console.log('Trying action');
             self.whichAction();
+          } else if (self.isFolder) {
+            console.log('No action for pre-existing folders.');
           } else {
             console.log(`Can't do anything.`);
           }
@@ -628,6 +745,7 @@ Vue.component('selector', {
   updated() {
     this.updateInput();
     this.inputHeal();
+    console.log(this.$root.$children[3].isFolder)
     // this.checkFolderSlash();
   },
   methods : {
@@ -881,6 +999,8 @@ var app = new Vue({
     masterPath: sysPath,
     selectedPath: '',
     isLocked: false,
+    aFParent: '',
+    aFChild: '',
   },
   computed: {
     input: function() {
@@ -916,15 +1036,33 @@ var app = new Vue({
     setData: function(res) {
       this.treeData = JSON.parse(res);
     },
+    navigate: function(direction) {
+      console.log(direction);
+      Event.fire('altFocusChange', direction);
+      // console.log(this.$root.$children[3]);
+
+    }
   },
   created() {
+    var self = this;
+    document.body.addEventListener('keyup', function(e){
+      var arrowKeys = ['Left', 'Right', 'Up', 'Down'];
+      arrowKeys.forEach(function(v,i,a){
+        if ((e.key == 'Arrow' + v) && (e.altKey)) {
+          var dir = e.key.replace(/Arrow/gm, '');
+          console.log(self.$root.$children[3]);
+          self.navigate(dir);
+        }
+      });
+      // console.log('Hello?');
+    })
     document.body.setAttribute('spellcheck', false);
-    var that = this;
+    // var that = this;
     console.log(`This is running on ${this.OS}`);
 
     //
     // Using separate vue instance to communicate to root instance:
-    Event.listen('toParent', that.toParent)
+    // Event.listen('toParent', that.toParent)
     // Event.listen('toParent', function() {
     //   that.toParent();
     // })

@@ -279,6 +279,20 @@ body {
   transition: color 120ms var(--quad) 20ms;
 } */
 
+[class*='ocus'] {
+  outline-offset: -2px;
+  outline-width: 2px;
+  outline-style: solid;
+}
+
+.altFocus {
+  outline-color: blue;
+}
+
+.altNoFocus {
+  outline-color: transparent;
+}
+
 .focus {
   width: calc(100% - var(--rowMargin));
   transition: color 120ms var(--quad) 20ms;
@@ -323,6 +337,7 @@ body {
   user-select: none;
   display: block;
   width: 100%;
+  border: 2px solid transparent;
 }
 
 .angleNull, .branch-angle, .branch-type {

@@ -13,9 +13,6 @@ git clone https://github.com/Inventsable/mightyFolders.git
 ## recursive folder tree menu
 ![](https://thumbs.gfycat.com/FastWarpedAnophelesmosquito-size_restricted.gif)
 
-## menu selection lock
-![](https://thumbs.gfycat.com/WealthyRequiredCrownofthornsstarfish-size_restricted.gif)
-
 ## contextual controls
 
 ```javascript
@@ -23,6 +20,8 @@ git clone https://github.com/Inventsable/mightyFolders.git
 green: `this file doesn't exist yet`
 white: file exists
 ```
+
+![](https://thumbs.gfycat.com/EagerAgedBluebreastedkookaburra-size_restricted.gif)
 
 <h4>Logic for quick import, export, save and load</h4>
 

@@ -779,10 +779,8 @@ Vue.component('selector', {
     var self = this;
     this.$el.addEventListener('keyup', function(e){
       if (e.key == 'Enter') {
-        console.log('Submitting...');
-        // console.log(this);
-        // e.preventDefault();
-        // e.stopPropagation();
+        // console.log('Submitting...');
+        console.log('submitting while ' + self.$root.isAlt);
         try {
           if (self.hasAction) {
             // console.log('Trying action');
@@ -988,8 +986,22 @@ Vue.component('selector', {
       return res;
     },
     quickSave: function(e) {
-      console.log(this.$root.masterText + ' should save as a new file');
-      console.log(e);
+
+      // console.log(this.$root.masterText + ' should save as a new file');
+      // console.log(e);
+      // var absPath = this.$root.masterText;
+      var absPath = this.$root.masterPath;
+      var fullText = this.fullText;
+      fullText = fullText.replace(/.*[^\.\/]/, '').trim();
+      fullText = trimL(fullText, 1);
+      var totalPath = absPath + fullText;
+      console.log(`Saving ${absPath}${fullText}`);
+      if (this.$root.isAlt) {
+        console.log('Saving selection');
+      } else {
+        // console.log('Saving normal');
+        csInterface.evalScript(`saveDoc('${totalPath}')`)
+      }
     },
     quickLoad: function(e) {
       console.log(this.$root.masterText + ' should load as a new document');
@@ -1059,6 +1071,7 @@ var app = new Vue({
     aFChild: '',
     docName: '',
     docPath: '',
+    isAlt: false,
   },
   computed: {
     input: function() {
@@ -1132,6 +1145,10 @@ var app = new Vue({
   created() {
     var self = this;
     document.body.addEventListener('keyup', function(e){
+      if (e.key == 'Alt') {
+        this.isAlt = false;
+        // console.log(this.isAlt);
+      }
       var arrowKeys = ['Left', 'Right', 'Up', 'Down'];
       arrowKeys.forEach(function(v,i,a){
         if ((e.key == 'Arrow' + v) && (e.altKey)) {
@@ -1140,6 +1157,13 @@ var app = new Vue({
           self.navigate(dir);
         }
       });
+    document.body.addEventListener('keydown', function(e){
+      if (e.key == 'Alt') {
+        this.isAlt = true;
+        // console.log(this.isAlt);
+      }
+    })
+
       // console.log('Hello?');
     })
     document.body.setAttribute('spellcheck', false);

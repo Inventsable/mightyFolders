@@ -1,6 +1,18 @@
+var doc = app.activeDocument;
+var exist = app.documents.length > 0;
 // thanks @SillyV
 function thisDoc() {
-    return app.activeDocument.fullName;
+    return doc.fullName;
+}
+function saveDoc(dest) {
+    if (exist) {
+        var aiDoc = new File(dest);
+        var saveOptions = new IllustratorSaveOptions();
+        if (arguments.length < 2)
+            doc.saveAs(aiDoc, saveOptions);
+        else if (arguments[1] == 'selection')
+            doc.exportSelectionAsAi(aiDoc, saveOptions);
+    }
 }
 function createDirectoryTree(path) {
     var f = Folder(path);

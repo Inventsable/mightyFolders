@@ -1,0 +1,24 @@
+{
+  "name": "mightyFolders",
+  "version": "0.0.1",
+  "description": "``` bash\r # install",
+  "main": "client/main.js",
+  "dependencies": {
+    "types-for-adobe": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Inventsable/mightyFolders.git"
+  },
+  "keywords": [],
+  "author": "Tom Scharstein <TRScharstein@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Inventsable/mightyFolders/issues"
+  },
+  "homepage": "https://github.com/Inventsable/mightyFolders#readme"
+}

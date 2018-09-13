@@ -145,6 +145,10 @@ body {
   color: var(--colorFont);
 }
 
+.branch-thisDoc {
+  color: var(--colorFindActive);
+}
+
 .branch-active:hover, .branch-idle:hover {
   /* color: var(--colorFontHover); */
   transition: color 120ms var(--quad) 20ms;

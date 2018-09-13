@@ -1,6 +1,7 @@
 // thanks @SillyV
+alert(thisDoc());
 function thisDoc() {
-    return app.activeDocument.fullName;
+    return app.activeDocument.path;
 }
 function createDirectoryTree(path) {
     var f = Folder(path);

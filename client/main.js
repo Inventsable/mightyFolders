@@ -30,7 +30,7 @@ Vue.component('branch', {
     </div>
     <div :class="focusClass">
       <div
-        :class="(highlight) ? styleHigh : styleHighFocus"
+        :class="branchClass"
         @click="toggle"
         @mouseover="ifLocked ? nulli : highlightThis(true)"
         @mouseout="ifLocked ? nulli : highlightThis(false)">
@@ -76,6 +76,8 @@ Vue.component('branch', {
       sibs: [],
       next: '',
       prev: '',
+      // isDocAncestor: false,
+
       // aFParent: '',
       // aFChild: '',
     }
@@ -85,6 +87,7 @@ Vue.component('branch', {
     // this.$root.$children[3].$children[0].isAltFocused = true;
     // this.findAltFocus(this.$root);
     // Event.listen('altFocusChange', this.nextAltFocus)
+    // this.searchDocAncestry()
   },
   created() {
     if(this.model.children &&
@@ -97,6 +100,26 @@ Vue.component('branch', {
     // document.body.addEventListener('keyup', this.keyHandler)
   },
   computed: {
+    branchClass: function() {
+      // this.isThisDocAncestor();
+      var style;
+      if (this.highlight)
+        style = this.styleHigh;
+      else
+        style = this.styleHighFocus;
+      if (this.model.name == this.$root.docName) {
+        style += ' branch-thisDoc'
+      }
+
+      if (this.hasThisDoc) {
+        //  || (this.isDocAncestor)
+        // console.log('Has this doc as child');
+        if (!this.open) {
+          style += ' branch-thisDoc'
+        }
+      }
+      return style;
+    },
     focusClass: function() {
       var res = '';
       res += (this.hasFocus) ? 'focus' : 'noFocus';
@@ -152,11 +175,47 @@ Vue.component('branch', {
       this.geneList = [];
       return result;
     },
+    geneString: function() {
+      return this.geneList.join();
+    },
+    hasThisDoc: function() {
+      var name = this.$root.docName;
+      var res = false;
+      if (this.isFolder) {
+        for (var i = 0; i < this.model.children.length; i++) {
+          if (name == this.model.children[i].name) {
+            res = true;
+          }
+        }
+      }
+      return res;
+    },
   },
   methods: {
     keyHandler: function(event) {
       // console.log(`${event.key} was pressed`);
       console.log(event);
+    },
+    isDocAncestor: function() {
+      console.log(this.geneList);
+      // var result = false;
+      // var result = this.searchDocAncestry(this);
+    },
+    searchDocAncestry: function(parent) {
+      var res = false;
+      if (parent.isFolder) {
+        var targ = parent.model.children;
+        console.log(targ);
+        for (var i = 0; i < targ.length; i++) {
+          // console.log(targ[i]);
+          if (targ[i].name == this.$root.docName) {
+            res = true;
+          } else {
+            this.searchDocAncestry(targ)
+          }
+        }
+      }
+      return res;
     },
     getAncestry: function(parent) {
         if (parent.$children.length) {
@@ -177,9 +236,6 @@ Vue.component('branch', {
         this.traceAncestry(gene.$parent)
       }
     },
-    nulli: function() {
-      // console.log('nothing happens');
-    },
     locked: function(e) {
       console.log('This is locked, no pass through');
     },
@@ -193,7 +249,6 @@ Vue.component('branch', {
         if (/\/$/gm.test(selectedPath))
           selectedPath = trimR(selectedPath, 1);
         this.$root.selectedPath = selectedPath;
-        // console.log(this.$root.selectedPath);
         this.$root.masterText = this.geneology;
         if (this.isFolder) {
           this.open = !this.open;
@@ -745,7 +800,7 @@ Vue.component('selector', {
   updated() {
     this.updateInput();
     this.inputHeal();
-    console.log(this.$root.$children[3].isFolder)
+    // console.log(this.$root.$children[3].isFolder)
     // this.checkFolderSlash();
   },
   methods : {
@@ -901,7 +956,7 @@ Vue.component('selector', {
             // console.log('This is an existing folder');
             result = splitResult;
           } else {
-            console.log('This folder does not exist yet');
+            // console.log('This folder does not exist yet');
             this.newFolder = true;
             result = splitResult;
           }
@@ -997,10 +1052,13 @@ var app = new Vue({
     selected: 'none',
     masterText: './',
     masterPath: sysPath,
+    masterFolder: '',
     selectedPath: '',
     isLocked: false,
     aFParent: '',
     aFChild: '',
+    docName: '',
+    docPath: '',
   },
   computed: {
     input: function() {
@@ -1030,11 +1088,39 @@ var app = new Vue({
       // But try below and Illustrator will crash:
       // this.getData(newPath)
     },
+    getDoc: function() {
+      csInterface.evalScript(`thisDoc()`, this.setDoc)
+    },
+    setDoc: function(doc) {
+      this.docName = doc.substr(doc.lastIndexOf('/') + 1);
+      this.docPath = doc.match(/.*\/(?=[^.*])/gm)[0];
+      // if (inString(this.docPath, this.masterFolder))
+        // console.log('Has current doc');
+        // this.findDoc();
+    },
+    // findDoc: function(parent) {
+    //     if (parent.$children.length) {
+    //       for (var i = 0; i < parent.$children.length; i++) {
+    //         var targ = parent.$children[i];
+    //         if (targ.isAltFocused) {
+    //           this.hasAltFocus = targ;
+    //           // this.$root.altFocus = targ;
+    //           this.$root.aFParent = parent;
+    //           this.$root.aFChild = targ;
+    //           break
+    //         }
+    //         if (!this.isAltFocused)
+    //           this.findAltFocus(targ);
+    //         // targ.hasFocus = false;
+    //       };
+    //     }
+    // },
     getData: function(path) {
       csInterface.evalScript(`callTree('${path}')`, this.setData)
     },
     setData: function(res) {
       this.treeData = JSON.parse(res);
+      this.masterFolder = this.treeData.name;
     },
     navigate: function(direction) {
       console.log(direction);
@@ -1059,8 +1145,6 @@ var app = new Vue({
     document.body.setAttribute('spellcheck', false);
     // var that = this;
     console.log(`This is running on ${this.OS}`);
-
-    //
     // Using separate vue instance to communicate to root instance:
     // Event.listen('toParent', that.toParent)
     // Event.listen('toParent', function() {
@@ -1068,7 +1152,8 @@ var app = new Vue({
     // })
   },
   mounted() {
-    this.getData(`${this.masterPath}`)
+    this.getData(`${this.masterPath}`);
+    this.getDoc();
   }
 })
 

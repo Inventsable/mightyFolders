@@ -8,14 +8,20 @@ function createDirectoryTree(path){
   return getChildNodes(f);
 }
 
-function getChildNodes(fsNode){
-  if(fsNode instanceof Folder){
+function getChildNodes(fsNode) {
+  var ignores = [".git", "node_modules"];
+  if (fsNode instanceof Folder) {
   	var children = [];
 	var allFiles = fsNode.getFiles();
 	for (var i = 0; i < allFiles.length; i++) {
     // add custom ignore
-    if ((allFiles[i].name !== ".git") || (allFiles[i].name !== "node_modules"))
-	   children.push(getChildNodes(allFiles[i]));
+    for (var a = 0; a < ignores.length; a++) {
+
+    }
+    if (allFiles[i].name !== ".git") {
+      if (allFiles[i].name !== "node_modules")
+        children.push(getChildNodes(allFiles[i]));
+    }
 	}
   	return {
       name : decodeURI(fsNode.name) + "/",

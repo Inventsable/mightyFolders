@@ -1,19 +1,9 @@
 var doc = app.activeDocument;
 var exist = app.documents.length > 0;
+var hasSelection = app.selection.length > 0;
+// File menu generation
 // thanks @SillyV
-function thisDoc() {
-    return doc.fullName;
-}
-function saveDoc(dest) {
-    if (exist) {
-        var aiDoc = new File(dest);
-        var saveOptions = new IllustratorSaveOptions();
-        if (arguments.length < 2)
-            doc.saveAs(aiDoc, saveOptions);
-        else if (arguments[1] == 'selection')
-            doc.exportSelectionAsAi(aiDoc, saveOptions);
-    }
-}
+//
 function createDirectoryTree(path) {
     var f = Folder(path);
     return getChildNodes(f);
@@ -44,7 +34,89 @@ function getChildNodes(fsNode) {
     }
 }
 function callTree(path) {
+    // console.log('Creating tree');
     var allNodes = createDirectoryTree(path);
     var allNodesInJson = JSON.stringify(allNodes, null, 2);
     return allNodesInJson;
+}
+//        Quick actions
+//
+//
+function thisDoc() {
+    return doc.fullName;
+}
+function saveDoc(dest) {
+    if (exist) {
+        var aiDoc = new File(dest);
+        var saveOptions = new IllustratorSaveOptions();
+        if (hasSelection)
+            doc.exportSelectionAsAi(aiDoc);
+        else
+            doc.saveAs(aiDoc, saveOptions);
+    }
+}
+function openDoc(dest) {
+    var thisFile = File(path);
+    app.open(thisFile);
+}
+function setOptionsForSVGExport() {
+    var options = new ExportOptionsWebOptimizedSVG();
+    options.artboardRange = 1;
+    options.coordinatePrecision = 2;
+    options.fontType = SVGFontType.OUTLINEFONT;
+    options.svgId = SVGIdType.SVGIDREGULAR;
+    options.cssProperties = SVGCSSPropertyLocation.STYLEELEMENTS;
+    return options;
+}
+function exportSVG(path) {
+    var thisFile = new File(path);
+    var type = ExportType.WOSVG;
+    doc.exportFile(thisFile, type, setOptionsForSVGExport());
+}
+function exporter(dest) {
+    if (/\.svg$/gm.test(dest)) {
+        exportSVG(dest);
+    }
+    else if (/\.(png|jpeg|psd|eps|gif|tiff)$/gm.test(dest)) {
+        exportAs(dest);
+    }
+    else {
+        alert('Unsupported file format');
+    }
+}
+function setOptionsForPNG24Export() {
+    var options = new ExportOptionsWebOptimizedSVG();
+    return options;
+}
+function runScript(path) {
+    try {
+        $.evalFile(path);
+    }
+    catch (e) {
+        JSXEvent(e.name + "," + e.line + "," + e + "," + e.message, "console");
+    }
+}
+function exportAs(path) {
+    var thisFile = new File(path);
+    if (/\.png$/gm.test(path)) {
+        if (hasSelection)
+            doc.exportSelectionAsPNG(thisFile);
+        else
+            doc.exportFile(thisFile, ExportType.PNG24);
+    }
+    else if (/\.psd$/gm.test(path)) {
+        doc.exportFile(thisFile, ExportType.PHOTOSHOP);
+    }
+    else {
+        var ext = /\.(\w*)$/gm;
+        var result = path.match(ext);
+        result = result[0];
+        try {
+            // doc.exportFile(thisFile, ExportType[result])
+            alert('Export as ' + result);
+        }
+        catch (e) {
+            alert(e);
+        }
+    }
 }

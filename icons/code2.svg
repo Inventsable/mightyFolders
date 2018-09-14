@@ -1,0 +1,16 @@
+<svg id="code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #b4b4b5;
+      }
+    </style>
+  </defs>
+  <title>code2</title>
+  <rect class="cls-1" width="20" height="20"/>
+  <path class="cls-2" d="M10,17h9v2H10Zm-.27-4.27a1,1,0,0,0,0-1.42L3.65,5.23,2.23,6.64,7.61,12l-5.3,5.3,1.41,1.41Z" transform="translate(0 0)"/>
+</svg>

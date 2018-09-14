@@ -141,6 +141,7 @@ body {
   color: var(--colorFontHover);
 }
 
+
 .branch-parentDef {
   color: var(--colorFont);
 }
@@ -172,9 +173,55 @@ body {
   background-color: var(--colorBG);
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
 }
+
+[class^="action"] {
+  /* background-color: red; */
+}
+
+.actionBar {
+  z-index: 10;
+  display: flex;
+  justify-content: flex-end;
+  height: 1.25rem;
+  max-width: 10rem;
+  min-width: 2rem;
+  /* margin-right: 2rem; */
+  border: 2px solid red;
+}
+
+.actionNull {
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  height: 1.25rem;
+  max-width: 10rem;
+  min-width: 2rem;
+  /* margin-right: 2rem; */
+  border: 2px solid blue;
+}
+
+.branch-Prefix {
+  display: flex;
+  justify-content: flex-start;
+}
+/*
+.branch-Suffix {
+  display: flex;
+  justify-content: flex-end;
+  height: 1.25rem;
+  max-width: 10rem;
+  min-width: 2rem;
+  margin-right: 2rem;
+} */
+
+.branch-Suffix:hover {
+  background-color: var(--highlight);
+}
+
 
 .branch-active {
   /* cursor: pointer; */
@@ -182,6 +229,7 @@ body {
   padding: .125rem 0px;
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
   /* width: 100%; */
 }

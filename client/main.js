@@ -27,6 +27,11 @@ Vue.component('branch', {
   template: `
   <li>
     <div class="collapseCol">
+      <div v-if="anyActions"
+        :class="(anyActions) ? 'actionBar' : 'actionNull'"
+        @mouseover="actionHovering(true)"
+        @mouseout="actionHovering(false)">
+      </div>
     </div>
     <div :class="focusClass">
       <div
@@ -34,14 +39,16 @@ Vue.component('branch', {
         @click="toggle"
         @mouseover="ifLocked ? nulli : highlightThis(true)"
         @mouseout="ifLocked ? nulli : highlightThis(false)">
-        <div :class="open ? 'branch-angleDown' : 'branch-angleRight'">
-          <span v-if="isFolder" :class="open ? 'adobe-icon-angleDown' : 'adobe-icon-angleRight'"></span>
-          <span v-if="!isFolder" class="angleNull"></span>
-        </div>
-        <div class="branch-type">
-          <span :class="isFolder ? 'adobe-icon-folder' : 'adobe-icon-file'"></span>
-        </div>
-        <span class="branch-name">{{ nameType }}</span>
+          <div class="branch-Prefix">
+            <div :class="open ? 'branch-angleDown' : 'branch-angleRight'">
+              <span v-if="isFolder" :class="open ? 'adobe-icon-angleDown' : 'adobe-icon-angleRight'"></span>
+              <span v-if="!isFolder" class="angleNull"></span>
+            </div>
+            <div class="branch-type">
+              <span :class="isFolder ? 'adobe-icon-folder' : 'adobe-icon-file'"></span>
+            </div>
+            <span class="branch-name">{{ nameType }}</span>
+          </div>
       </div>
       <ul class="childBranch" v-show="open" v-if="isFolder">
         <div class="limitMar">
@@ -76,6 +83,7 @@ Vue.component('branch', {
       sibs: [],
       next: '',
       prev: '',
+      actionHover: false,
       // isDocAncestor: false,
 
       // aFParent: '',
@@ -100,6 +108,30 @@ Vue.component('branch', {
     // document.body.addEventListener('keyup', this.keyHandler)
   },
   computed: {
+    anyActions: function() {
+      var result = false;
+      var name = this.model.name;
+      var isFile = /(.*\/.*\..*)|(.*LICENSE)/gm;
+      var isLoad = /\.(ai|pdf)/gm;
+      var isScript = /\.(jsx|ts)/gm;
+      var isCode = /\.(js\s|js|css|html|json|xml|vue|debug)/gm;
+      var isImport = /\.(png|jpg|svg|dxf|woff|ttf)/gm;
+
+      console.log(name);
+
+      if (isFile.test(name)) {
+        if (isLoad.test(name))
+          result = true;
+        else if (isScript.test(name))
+          result = true;
+        else if (isCode.test(name))
+          result = true;
+        else if (isImport.test(name))
+          result = true;
+      }
+      // return result;
+      return false;
+    },
     branchClass: function() {
       // this.isThisDocAncestor();
       var style;
@@ -110,7 +142,6 @@ Vue.component('branch', {
       if (this.model.name == this.$root.docName) {
         style += ' branch-thisDoc'
       }
-
       if (this.hasThisDoc) {
         //  || (this.isDocAncestor)
         // console.log('Has this doc as child');
@@ -192,6 +223,42 @@ Vue.component('branch', {
     },
   },
   methods: {
+    actionHovering: function(state) {
+      this.actionHover = state;
+      console.log(this.actionHover);
+    },
+    checkAction: function(targ) {
+      // var target = targ;
+      var parent = targ.relatedTarget.parentNode;
+      var match = parent.children[0].children[0].children[2];
+      console.log(match.textContent);
+    },
+    recurseActionFromSelector: function(parent, origin) {
+      if (parent.$children.length) {
+        for (var i = 0; i < parent.$children.length; i++) {
+          var targ = parent.$children[i];
+          if (targ.name == origin) {
+            console.log('Found origin');
+            return targ;
+          } else {
+            if (this.isFolder) {
+              console.log('this is a folder');
+              this.recurseActionFromSelector(targ, origin);
+            }
+          }
+        };
+      }
+    },
+    findActionSibling: function(e) {
+      var origin = e;
+      var selector = this.$root.$children[1];
+      console.log(selector);
+      var match = this.recurseActionFromSelector(selector, origin);
+      // console.log(this);
+    },
+    nulli: function() {
+      // nothing happens
+    },
     keyHandler: function(event) {
       // console.log(`${event.key} was pressed`);
       console.log(event);
@@ -523,6 +590,13 @@ Vue.component('selector', {
     }
   },
   computed: {
+    actionPath: function() {
+      var absPath = this.$root.masterPath;
+      var fullText = this.fullText;
+      fullText = fullText.replace(/.*[^\.\/]/, '').trim();
+      fullText = trimL(fullText, 1);
+      return absPath + fullText;
+    },
     anno: function() {
       var desc = 'no action';
       if (this.canQuicksave)
@@ -648,7 +722,7 @@ Vue.component('selector', {
       var res = false;
       var targ = this.fullText;
       if (this.isFile(targ)) {
-        if (/\.(js\s|js|css|html|json|xml|vue|ts|debug)/gm.test(targ)) {
+        if (/\.(js\s|js|css|html|json|xml|vue|debug)/gm.test(targ)) {
           if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
             // console.log(targ);
             if (/\.jsx/gm.test(targ)) {
@@ -667,7 +741,7 @@ Vue.component('selector', {
       var res = false;
       var targ = this.fullText;
       if (this.isFile(targ)) {
-        if (/\.jsx/gm.test(targ)) {
+        if (/\.(jsx|ts)/gm.test(targ)) {
           if (this.withinFiles(targ.substr(targ.lastIndexOf('/') + 1))) {
             res = true
           }
@@ -779,14 +853,12 @@ Vue.component('selector', {
     var self = this;
     this.$el.addEventListener('keyup', function(e){
       if (e.key == 'Enter') {
-        // console.log('Submitting...');
-        console.log('submitting while ' + self.$root.isAlt);
         try {
           if (self.hasAction) {
             // console.log('Trying action');
             self.whichAction();
           } else if (self.isFolder) {
-            console.log('No action for pre-existing folders.');
+            console.log('No actions yet for pre-existing folders.');
           } else {
             console.log(`Can't do anything.`);
           }
@@ -855,7 +927,6 @@ Vue.component('selector', {
       })
       return result;
     },
-
     exists: function(data) {
       // var regex = /.*[^./]/gm;
       // var data = data.replace(regex, '');
@@ -986,49 +1057,46 @@ Vue.component('selector', {
       return res;
     },
     quickSave: function(e) {
-
-      // console.log(this.$root.masterText + ' should save as a new file');
-      // console.log(e);
-      // var absPath = this.$root.masterText;
-      var absPath = this.$root.masterPath;
-      var fullText = this.fullText;
-      fullText = fullText.replace(/.*[^\.\/]/, '').trim();
-      fullText = trimL(fullText, 1);
-      var totalPath = absPath + fullText;
-      console.log(`Saving ${absPath}${fullText}`);
-      if (this.$root.isAlt) {
-        console.log('Saving selection');
-      } else {
-        // console.log('Saving normal');
-        csInterface.evalScript(`saveDoc('${totalPath}')`)
-      }
+      // console.log(`Saving ${this.actionPath}`);
+      csInterface.evalScript(`saveDoc('${this.actionPath}')`)
     },
     quickLoad: function(e) {
-      console.log(this.$root.masterText + ' should load as a new document');
-      console.log(e);
+      console.log(this.actionPath + ' should load as a new document');
+      csInterface.evalScript(`saveDoc('${this.actionPath}')`)
     },
     quickExport: function(e) {
-      console.log(this.$root.masterText + ' should export from this document');
-      console.log(e);
+      csInterface.evalScript(`exporter('${this.actionPath}')`)
     },
     quickImport: function(e) {
-      console.log(this.$root.masterText + ' should import to current document');
+      console.log(this.actionPath + ' should import to current document');
       console.log(e);
     },
     quickScript: function(e) {
-      console.log(this.$root.masterText + ' should run as a script');
-      console.log(e);
+      console.log(this.actionPath + ' should run as a script');
+      var isTypeScript = /\.(ts)$/gm.test(this.actionPath);
+      var result;
+      if (isTypeScript) {
+        console.log('This is a compiled typescript file');
+        result = this.actionPath.replace(/(ts)/gm, 'jsx')
+        if (this.exists(result)) {
+          console.log('Which does exist');
+        } else {
+          console.log('Which does not exist');
+        }
+      }
+      csInterface.evalScript(`runScript('${this.actionPath}')`)
+      // console.log(e);
     },
     quickCode: function(e) {
-      console.log(this.$root.masterText + ' should display in PlayWrite');
+      console.log(this.actionPath + ' should display in PlayWrite');
       console.log(e);
     },
     quickText: function(e) {
-      console.log(this.$root.masterText + ' should paste code into document');
+      console.log(this.actionPath + ' should paste code into document');
       console.log(e);
     },
     quickFolder: function(e) {
-      console.log(this.$root.masterText + ' should be created as a new folder');
+      console.log(this.actionPath + ' should be created as a new folder');
       console.log(e);
     },
     setActive : function(lower) {
@@ -1147,7 +1215,7 @@ var app = new Vue({
     document.body.addEventListener('keyup', function(e){
       if (e.key == 'Alt') {
         this.isAlt = false;
-        // console.log(this.isAlt);
+        console.log(this.isAlt);
       }
       var arrowKeys = ['Left', 'Right', 'Up', 'Down'];
       arrowKeys.forEach(function(v,i,a){
@@ -1157,14 +1225,14 @@ var app = new Vue({
           self.navigate(dir);
         }
       });
+      // console.log('Hello?');
+    })
+
     document.body.addEventListener('keydown', function(e){
       if (e.key == 'Alt') {
         this.isAlt = true;
-        // console.log(this.isAlt);
+        console.log(this.isAlt);
       }
-    })
-
-      // console.log('Hello?');
     })
     document.body.setAttribute('spellcheck', false);
     // var that = this;

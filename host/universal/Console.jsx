@@ -1,4 +1,4 @@
-JSXEvent('Loading...', 'console')
+// JSXEvent('Loading...', 'console')
 
 var doc = app.documents[0];
 var directory;
@@ -10,11 +10,11 @@ var activeAB = thisDoc.artboards.getActiveArtboardIndex();
 var lastAB = 0;
 var lastABOffset, isOrigin, thisAB, absAB, relAB;
 
-function getName(){
-  return app.documents[0].name;
-}
+// function getName(){
+//   return app.documents[0].name;
+// }
 
-function setDirectory(path){
+function createFolder(path){
   setPath = path;
   var setFolder = new Folder(path);
   setFolder.create();
@@ -22,23 +22,24 @@ function setDirectory(path){
 
 function deleteFolder(path) {
   var thisFolder = Folder(path);
+  clearFolder(path);
   try {
     thisFolder.remove();
     return true;
   } catch(e){return false;}
 }
 
-function verifyFile(name){
-  var newFile = File(setPath + "/" + name + ".svg");
-  try {newFile.open('r');
-    } catch(e){alert(e)};
+function verifyFile(path){
+  var newFile = File(path);
+  try { newFile.open('r');
+    } catch(e) { alert(e) };
   var contents = newFile.read();
   return contents;
 }
 
-function clearSet(){
-  var setFolder = Folder(setPath);
-  var setFile = setFolder.getFiles("*.svg");
+function clearFolder(path){
+  var setFolder = Folder(path);
+  var setFile = setFolder.getFiles();
   if ( !setFile.length ) {
     // alert("No files");
     return;
@@ -49,14 +50,6 @@ function clearSet(){
   }
 }
 
-function runScript(path) {
-  try {
-  $.evalFile(path)
-  } catch (e) {
-    JSXEvent(e.name + "," + e.line + "," + e + "," + e.message, "console")
-  }
-}
-
 function JSXEvent(payload, eventType) {
   try {
     var xLib = new ExternalObject("lib:\PlugPlugExternalObject");
@@ -64,10 +57,10 @@ function JSXEvent(payload, eventType) {
     JSXEvent(e, 'console')
   }
   if (xLib) {
-  var eventObj = new CSXSEvent();
-  eventObj.type = eventType;
-  eventObj.data = payload;
-  eventObj.dispatch();
+    var eventObj = new CSXSEvent();
+    eventObj.type = eventType;
+    eventObj.data = payload;
+    eventObj.dispatch();
   }
   return;
 }

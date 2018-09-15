@@ -4,6 +4,11 @@ console.log('Loading mightyFolders...');
 loadUniversalJSXLibraries()
 loadJSX('mightyFolders.jsx')
 
+var storage = window.localStorage;
+// console.log(storage); // Empty
+// storage.setItem('test', 'is persistent')
+// console.log(storage); // Shows test: 'is persistent'
+
 window.Event = new class {
   constructor() {
     this.vue = new Vue()
@@ -98,12 +103,12 @@ Vue.component('branch', {
     // this.searchDocAncestry()
   },
   created() {
-    if(this.model.children &&
-        this.model.children.length){
-      this.model.children.sort(function(a,b){
-         return !(a.children && a.children.length);
-      });
-    }
+    // if(this.model.children &&
+    //     this.model.children.length){
+    //   this.model.children.sort(function(a,b){
+    //      return !(a.children && a.children.length);
+    //   });
+    // }
     // document.getElementById("name").addEventListener("click", , false);
     // document.body.addEventListener('keyup', this.keyHandler)
   },
@@ -117,8 +122,7 @@ Vue.component('branch', {
       var isCode = /\.(js\s|js|css|html|json|xml|vue|debug)/gm;
       var isImport = /\.(png|jpg|svg|dxf|woff|ttf)/gm;
 
-      console.log(name);
-
+      // console.log(name);
       if (isFile.test(name)) {
         if (isLoad.test(name))
           result = true;
@@ -158,12 +162,12 @@ Vue.component('branch', {
       return res;
     },
     nameType: function() {
-      var name = '';
-      if (this.isFolder) {
-        name = trimR(this.model.name, 1);
-      } else {
+      // var name = '';
+      // if (this.isFolder) {
+        // name = trimR(this.model.name, 1);
+      // } else {
         name = this.model.name;
-      }
+      // }
       return name;
     },
     ifLocked: function() {
@@ -313,8 +317,8 @@ Vue.component('branch', {
         this.getAncestry(this.$root)
         // console.log(this.geneology);
         var selectedPath = this.$root.masterPath + trimL(this.geneology, 1)
-        if (/\/$/gm.test(selectedPath))
-          selectedPath = trimR(selectedPath, 1);
+        // if (/\/$/gm.test(selectedPath))
+        //   selectedPath = trimR(selectedPath, 1);
         this.$root.selectedPath = selectedPath;
         this.$root.masterText = this.geneology;
         if (this.isFolder) {
@@ -1129,6 +1133,7 @@ var app = new Vue({
   el: '#app',
   data: {
     treeData: { name : 'Something went wrong.' },
+    Oak: { name : 'default' },
     selected: 'none',
     masterText: './',
     masterPath: sysPath,
@@ -1140,6 +1145,7 @@ var app = new Vue({
     docName: '',
     docPath: '',
     isAlt: false,
+    ignored: /((\.git)|(node_modules)|(package.json)|(package-lock.json))/gm
   },
   computed: {
     input: function() {
@@ -1158,6 +1164,86 @@ var app = new Vue({
     }
   },
   methods: {
+    parseJsonFromFile: function() {
+      var mirror = this.readFile(sysPath + '/MFconfig.json')
+      var result = JSON.parse(mirror);
+      this.sortTree(result);
+      this.treeData = result;
+      return result;
+    },
+    writeJsonToFile: function() {
+      var strVal = JSON.stringify(this.Oak);
+      this.writeFile(sysPath + '/MFconfig.json', strVal);
+    },
+    buildJsonMenu: function() {
+      this.Oak = this.buildJsonChild(sysPath, this.readDir(sysPath));
+      console.log(this.Oak);
+    },
+    buildJsonChild: function(path, parent=[]) {
+      var mirror = {};
+      var self = this;
+      // mirror.selected = false;
+      // mirror.open = false;
+      mirror.name = path.substr(path.lastIndexOf('/') + 1);
+      if (parent.length) {
+        mirror.children = [];
+        parent.forEach(function(v,i,a){
+          var child = {};
+          if (!self.isFile(v)) {
+            child = self.buildJsonChild(path + '/' + v, self.readDir(path + '/' + v));
+          } else {
+            child.name = v;
+            // child.selected = false;
+            // child.action = false;
+          }
+          mirror.children.push(child)
+        })
+      }
+      // if (self.ignored.test(mirror.name))
+        return mirror;
+    },
+    readFile: function(...args) {
+      var result;
+      if (args.length > 1)
+        result = window.cep.fs.readFile(args[0] + '/' + args[1]);
+      else
+        result = window.cep.fs.readFile(args[0]);
+      if (0 == result.err)
+        return result.data;
+    },
+    writeFile: function(...args) {
+      var result = window.cep.fs.writeFile(args[0], args[1]);
+      if (0 == result.err)
+        return result.data;
+      else
+        console.log(result);
+    },
+    readDir : function(path){
+      var result = window.cep.fs.readdir(path);
+      if (0 == result.err)
+        return result.data;
+      else
+        return false;
+    },
+    isFolder: function(str) {
+      var res;
+      if (/([^.git|\s](.*\..*))|(LICENSE)|(\.debug)/gm.test(str))
+        res = false;
+      else if ((str == './') || (str = '/'))
+        res = true;
+      else
+        res = true;
+      return res;
+    },
+    isFile: function(str) {
+      var res;
+      if (/([^.git|\s](.*\..*))|(LICENSE)|(\.debug)/gm.test(str))
+        res = true;
+      else
+        res = false;
+      return res;
+    },
+    // replaceInFile
     // @Vasily
     toParent: function() {
       var prev = this.masterPath;
@@ -1196,21 +1282,43 @@ var app = new Vue({
     //       };
     //     }
     // },
+    sortTree : function(node){
+      node.children.sort(function(a, b){
+        if (typeof a.children == "undefined" && typeof b.children == "undefined") {
+          // console.log(a.name + " compared to " + b.name);
+          return (a.name.charAt(0).toLowerCase() > b.name.charAt(0).toLowerCase()) ? 1 : -1;
+        } else if ((typeof a.children == "undefined") && (typeof b.children !== "undefined")){
+          return 1;
+        } else {
+          return -1;
+        }
+      });
+      var thisChild;
+      for (let i = 0; i < node.children.length; i++) {
+        thisChild = node.children[i];
+        if(thisChild.children && thisChild.children.length){
+          // console.log(thisChild.name);
+          this.sortTree(thisChild);
+        }
+      }
+    },
     getData: function(path) {
       csInterface.evalScript(`callTree('${path}')`, this.setData)
     },
     setData: function(res) {
-      this.treeData = JSON.parse(res);
-      this.masterFolder = this.treeData.name;
+      res = JSON.parse(res);
+      this.sortTree(res);
+      this.treeData = res;
+      // console.log(JSON.stringify(this.treeData, null, 2));
     },
     navigate: function(direction) {
-      console.log(direction);
+      // console.log(direction);
       Event.fire('altFocusChange', direction);
       // console.log(this.$root.$children[3]);
-
     }
   },
   created() {
+    // console.log(this.parseJsonFromFile());
     var self = this;
     document.body.addEventListener('keyup', function(e){
       if (e.key == 'Alt') {
@@ -1244,11 +1352,22 @@ var app = new Vue({
     // })
   },
   mounted() {
-    this.getData(`${this.masterPath}`);
+    // this.getData(`${this.masterPath}`);
+    this.parseJsonFromFile();
+    // this.parseJsonFromFile();
+    // console.log(this.readDir(sysPath));
+    this.buildJsonMenu();
+    // console.log(this.readFile(sysPath + '/MFconfig.json'));
     this.getDoc();
+  },
+  updated() {
+    console.log('Updated');
+    // var strVal = JSON.stringify(this.Oak);
+    // this.writeFile(sysPath + '/MFconfig.json', strVal)
+    this.writeJsonToFile();
+    console.log(this.readFile(`${sysPath}`));
   }
 })
-
 
 // var dirData = {
 //   "name":"mightyFolders",

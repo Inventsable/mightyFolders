@@ -4,6 +4,7 @@
   "description": "``` bash\r # install",
   "main": "client/main.js",
   "dependencies": {
+    "npm": "^6.4.1",
     "types-for-adobe": "^1.0.0"
   },
   "devDependencies": {},

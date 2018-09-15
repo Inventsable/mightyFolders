@@ -1,0 +1,171 @@
+{
+  "name": "mightyFolders/",
+  "children": [
+    {
+      "name": ".debug"
+    },
+    {
+      "name": "client/",
+      "children": [
+        {
+          "name": "index.html"
+        },
+        {
+          "name": "main.js"
+        },
+        {
+          "name": "myTstack/",
+          "children": [
+            {
+              "name": "adobeStyle.css"
+            },
+            {
+              "name": "anima.css"
+            },
+            {
+              "name": "CSInterface.js"
+            },
+            {
+              "name": "eventManager.js"
+            },
+            {
+              "name": "fonts/",
+              "children": [
+                {
+                  "name": "Adobe-Font.svg"
+                },
+                {
+                  "name": "Adobe-Font.ttf"
+                },
+                {
+                  "name": "Adobe-Font.woff"
+                }
+              ]
+            },
+            {
+              "name": "magicMirror.js"
+            },
+            {
+              "name": "menu_Context.js"
+            },
+            {
+              "name": "menu_Flyout.js"
+            },
+            {
+              "name": "mightyFiles.js"
+            },
+            {
+              "name": "mightyFunctions.js"
+            },
+            {
+              "name": "ReqLibs.js"
+            },
+            {
+              "name": "reset.css"
+            }
+          ]
+        },
+        {
+          "name": "style.css"
+        }
+      ]
+    },
+    {
+      "name": "CSXS/",
+      "children": [
+        {
+          "name": "manifest.xml"
+        }
+      ]
+    },
+    {
+      "name": "host/",
+      "children": [
+        {
+          "name": "main.jsx"
+        },
+        {
+          "name": "main.ts"
+        },
+        {
+          "name": "mightyFolders.jsx"
+        },
+        {
+          "name": "mightyFolders.ts"
+        },
+        {
+          "name": "tsconfig.json"
+        },
+        {
+          "name": "universal/",
+          "children": [
+            {
+              "name": "Console.jsx"
+            },
+            {
+              "name": "json2.jsx"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "icons/",
+      "children": [
+        {
+          "name": "AdobeIcons3.ai"
+        },
+        {
+          "name": "code.png"
+        },
+        {
+          "name": "code.svg"
+        },
+        {
+          "name": "code2.svg"
+        },
+        {
+          "name": "iconLight.png"
+        },
+        {
+          "name": "MFfont.ai"
+        },
+        {
+          "name": "MFfont2.ai"
+        },
+        {
+          "name": "selection.ai"
+        },
+        {
+          "name": "selectNew.ai"
+        }
+      ]
+    },
+    {
+      "name": "LICENSE"
+    },
+    {
+      "name": "log/",
+      "children": [
+        {
+          "name": "scribe.js"
+        }
+      ]
+    },
+    {
+      "name": "MFconfig.json"
+    },
+    {
+      "name": "newConfig.json"
+    },
+    {
+      "name": "package-lock.json"
+    },
+    {
+      "name": "package.json"
+    },
+    {
+      "name": "README.md"
+    }
+  ]
+}

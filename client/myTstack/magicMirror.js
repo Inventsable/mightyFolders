@@ -97,8 +97,8 @@ function initMagicMirror(){
 }
 
 function reset(){
-  // console.log("reload!");
-  location.reload();
+  callDoc();
+  console.log('Document changed to ' + appUI.data.doc);
 }
 
 function callDoc() {

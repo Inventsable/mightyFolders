@@ -36,10 +36,22 @@ var hasSelection = app.selection.length > 0;
     }
   }
 
+  function writeConfig(path, text) {
+
+    var JSONfile = new File(path + '/MFconfig.json');
+    JSONfile.open('w')
+    JSONfile.write(text);
+    JSONfile.close();
+  }
+
   function callTree(path) {
     // console.log('Creating tree');
     var allNodes = createDirectoryTree(path);
     var allNodesInJson = JSON.stringify(allNodes, null, 2);
+    // console.log(path);
+    // console.log(allNodes);
+    // console.log(allNodesInJson);
+    writeConfig(path, allNodesInJson)
     return allNodesInJson;
   }
 

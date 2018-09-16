@@ -162,12 +162,12 @@ Vue.component('branch', {
       return res;
     },
     nameType: function() {
-      // var name = '';
-      // if (this.isFolder) {
-        // name = trimR(this.model.name, 1);
-      // } else {
+      var name = '';
+      if (this.isFolder) {
+        name = trimR(this.model.name, 1);
+      } else {
         name = this.model.name;
-      // }
+      }
       return name;
     },
     ifLocked: function() {
@@ -317,8 +317,8 @@ Vue.component('branch', {
         this.getAncestry(this.$root)
         // console.log(this.geneology);
         var selectedPath = this.$root.masterPath + trimL(this.geneology, 1)
-        // if (/\/$/gm.test(selectedPath))
-        //   selectedPath = trimR(selectedPath, 1);
+        if (/\/$/gm.test(selectedPath))
+          selectedPath = trimR(selectedPath, 1);
         this.$root.selectedPath = selectedPath;
         this.$root.masterText = this.geneology;
         if (this.isFolder) {
@@ -528,7 +528,9 @@ Vue.component('lift', {
   },
   methods: {
     gotoParent: function() {
-      Event.fire('toParent');
+      // Event.fire('toParent');
+      console.log('Hello');
+      this.$root.goToParentJson();
     }
   }
 });
@@ -1161,22 +1163,57 @@ var app = new Vue({
       } else {
         return 'Unknown';
       }
+    },
+    parentPath: function() {
+      var prev = this.masterPath;
+      var newPath = prev.match(/.*\/.*(?=\/)/gm);
+      return newPath[0];
+    },
+    parentJson: function() {
+      var result = 'hello';
+      var newPath = this.parentPath;
+      // var mirror = {};
+      result = this.buildJsonChild(newPath, this.readDir(newPath));
+      console.log('Parent is:');
+      console.log(result);
+      return result;
     }
   },
   methods: {
+    goToParentJson: function() {
+      // var contents = this.parentJson;
+      var path = this.parentPath;
+      console.log('Travel to ' + path);
+      // this.buildJsonMenu(path)
+      // this.Oak = this.buildJsonChild(path, this.readDir(path));
+      // this.writeJsonToFile('parent');
+      // this.parseJsonFromFile();
+      // console.log('Oak is:');
+      // console.log(this.Oak);
+    },
     parseJsonFromFile: function() {
       var mirror = this.readFile(sysPath + '/MFconfig.json')
       var result = JSON.parse(mirror);
-      this.sortTree(result);
+      try {
+        this.sortTree(result);
+      } catch(e) {
+        console.log('Config needs to be reset');
+        console.log(e);
+      }
       this.treeData = result;
       return result;
     },
     writeJsonToFile: function() {
-      var strVal = JSON.stringify(this.Oak);
+      var strVal = '';
+      if (arguments.length > 0)
+        strVal = JSON.stringify(this.parentJson);
+      else
+        strVal = JSON.stringify(this.Oak);
       this.writeFile(sysPath + '/MFconfig.json', strVal);
     },
-    buildJsonMenu: function() {
-      this.Oak = this.buildJsonChild(sysPath, this.readDir(sysPath));
+    buildJsonMenu: function(path) {
+      this.Oak = this.buildJsonChild(path, this.readDir(path));
+      console.log('Oak is:');
       console.log(this.Oak);
     },
     buildJsonChild: function(path, parent=[]) {
@@ -1184,7 +1221,7 @@ var app = new Vue({
       var self = this;
       // mirror.selected = false;
       // mirror.open = false;
-      mirror.name = path.substr(path.lastIndexOf('/') + 1);
+      mirror.name = path.substr(path.lastIndexOf('/') + 1) + '/';
       if (parent.length) {
         mirror.children = [];
         parent.forEach(function(v,i,a){
@@ -1246,11 +1283,8 @@ var app = new Vue({
     // replaceInFile
     // @Vasily
     toParent: function() {
-      var prev = this.masterPath;
-      var newPath = prev.match(/.*\/.*(?=\/)/gm);
-      newPath = newPath[0];
-      console.log('Destination should be:');
-      console.log(newPath);
+      // console.log('Destination should be:');
+      // console.log(newPath);
       // ^ Correct path
       // But try below and Illustrator will crash:
       // this.getData(newPath)
@@ -1344,6 +1378,7 @@ var app = new Vue({
     })
     document.body.setAttribute('spellcheck', false);
     // var that = this;
+    this.parentJson;
     console.log(`This is running on ${this.OS}`);
     // Using separate vue instance to communicate to root instance:
     // Event.listen('toParent', that.toParent)
@@ -1354,18 +1389,16 @@ var app = new Vue({
   mounted() {
     // this.getData(`${this.masterPath}`);
     this.parseJsonFromFile();
-    // this.parseJsonFromFile();
-    // console.log(this.readDir(sysPath));
-    this.buildJsonMenu();
+    this.buildJsonMenu(sysPath);
     // console.log(this.readFile(sysPath + '/MFconfig.json'));
     this.getDoc();
   },
   updated() {
-    console.log('Updated');
+    console.log('Rewriting JSON');
     // var strVal = JSON.stringify(this.Oak);
     // this.writeFile(sysPath + '/MFconfig.json', strVal)
     this.writeJsonToFile();
-    console.log(this.readFile(`${sysPath}`));
+    // console.log(this.readFile(`${sysPath}`));
   }
 })
 
